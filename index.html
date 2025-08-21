@@ -1,0 +1,2555 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Curadoria Pro - Kiara [Faz filtro de datas]</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --primary: #01c5fc;
+      --primary-dark: #1592be;
+      --bg: #1c2330;
+      --card-bg: #232d3a;
+      --card-bg2: #232f3d;
+      --text: #eaf9ff;
+      --text-muted: #b8cee2;
+      --input-bg: #1c2737;
+      --input-border: #59d9ff;
+      --input-border-focus: #00ffe7;
+      --badge-blue: #0b92e5;
+      --badge-green: #1cd1a5;
+      --badge-yellow: #ffe066;
+      --radius: 17px;
+      --shadow: 0 6px 34px 0 #03254227;
+      --shadow-card: 0 2px 16px 0 #031c2c2a;
+    }
+    html, body {
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      font-size: 17px;
+      line-height: 1.57;
+      letter-spacing: 0.01em;
+    }
+    header {
+      padding: 24px 0 17px 0;
+      text-align: center;
+      background: none;
+      letter-spacing: .03em;
+    }
+    .kiara-title {
+      margin: 0 0 3px 0;
+      font-size: 2.3em;
+      font-weight: 700;
+      letter-spacing: .05em;
+      color: var(--primary);
+      text-shadow: 0 3px 32px #00e5ff17;
+    }
+    .assinatura-hdsp {
+      font-size: 1.07em;
+      color: #64d9ff;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      margin-top: 0px;
+      opacity: .70;
+    }
+    /* Upload inicial */
+    .container-centralizado-inicial {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 40vh;
+      margin-top: 22vh;
+    }
+    .upload-section {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-card);
+      padding: 30px 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .file-label {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+      border-radius: 11px;
+      padding: 13px 34px;
+      font-size: 1.08em;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 2.5px 14px #1592be31;
+      transition: background .17s;
+      margin-bottom: 13px;
+      outline: none;
+    }
+    .file-label:hover, .file-label:focus { background: var(--primary-dark);}
+    .file-name { color: var(--primary); font-weight: 600; font-size: 1.09em; margin-top: 4px;}
+    .msg-inicial { color: var(--text-muted); margin-top: 30px; text-align: center; font-size: 1.1em;}
+
+    /* Painel de cards topo: simétrico e compacto */
+.top-panel-row {
+  /* já alterado conforme etapa anterior */
+  display: grid;
+  grid-template-columns: 1.3fr 2.2fr 1.4fr;
+  gap: 26px;
+  margin: 0 auto 0 auto;
+  max-width: 1320px;
+  width: 100%;
+  align-items: stretch;   /* <-- Adicione ESTA LINHA */
+}
+.painel-estatisticas, .painel-filtros, .painel-exportacao {
+  background: var(--card-bg2);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  padding: 13px 20px 8px 20px;
+  border: 1.2px solid #1d2935;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  min-height: 1px;
+  height: 100%;           /* <-- Troque de auto para 100% */
+  min-height: 120px;      /* <-- Opcional, só para garantir estética mínima */
+  justify-content: flex-start;  /* <-- Troque para flex-start */
+  box-sizing: border-box;
+}
+    .painel-estatisticas .estat-card {
+      color: var(--primary);
+      font-size: 1.09em;
+      font-weight: 600;
+      margin-bottom: 2.5px;
+      letter-spacing: 0.01em;
+      display: flex;
+      align-items: center;
+    }
+    .painel-estatisticas .estat-card .estat-label {
+      color: #85e9ff;
+      font-size: .99em;
+      font-weight: 500;
+      margin-right: 7px;
+    }
+    .painel-estatisticas .estat-valor {
+      font-size: 1.09em;
+      color: #fff;
+      font-weight: 600;
+      margin-right: 15px;
+    }
+    .painel-estatisticas .estat-data { font-size: .93em; margin-top: 6px;}
+    /* Card de filtros - visual compacto */
+    .filtros-wrap {
+      display: flex;
+      gap: 13px;
+      align-items: flex-end;
+      margin-bottom: 6px;
+    }
+    .filtros-wrap > div { flex: 1; }
+    .filtros-wrap label {
+      color: #71eaff;
+      font-size: .99em;
+      font-weight: 600;
+      margin-bottom: 2px;
+      display: block;
+    }
+    .filtros-wrap input, .filtros-wrap select {
+      background: var(--input-bg);
+      border-radius: 8px;
+      border: 1.4px solid var(--input-border);
+      font-size: .96em;
+      color: var(--text);
+      padding: 7px 10px;
+      font-family: inherit;
+      box-shadow: 0 1.5px 7px #003a2b18;
+      outline: none;
+      margin-bottom: 0;
+      margin-top: 3px;
+      transition: border-color .16s, box-shadow .16s;
+      width: 100%;
+    }
+    .filtros-wrap input:focus, .filtros-wrap select:focus {
+      border-color: var(--input-border-focus);
+      box-shadow: 0 2px 7px #00f9ff36;
+      background: #223b46;
+    }
+    .filtros-wrap input::placeholder {
+      color: #6ce6ffcc;
+      opacity: .83;
+      font-weight: 500;
+    }
+    .filtros-btns-box {
+      display: flex;
+      gap: 9px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 7px;
+      width: 100%;
+    }
+    .painel-filtros button, .filtros-btns-box button {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 700;
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-size: .96em;
+      border: none;
+      cursor: pointer;
+      transition: background .15s, color .13s;
+      outline: none;
+      box-shadow: 0 1.5px 7px #0028;
+      font-family: 'Montserrat', Arial, sans-serif;
+      letter-spacing: .01em;
+      margin-bottom: 0;
+    }
+    .painel-filtros button:hover, .filtros-btns-box button:hover { background: var(--primary-dark);}
+    .filtros-qtd {
+      font-weight: 700;
+      font-size: .97em;
+      color: var(--badge-yellow);
+      background: #2a486e;
+      border-radius: 8px;
+      padding: 6px 15px;
+      margin-right: 5px;
+    }
+    /* Exportação */
+    .painel-exportacao button {
+      margin-top: 4px;
+      margin-bottom: 4px;
+      min-width: 98%;
+      background: #181e2a;
+      color: #45dbff;
+      font-weight: 700;
+      border-radius: 10px;
+      border: 1.3px solid #1951a2;
+      font-size: .99em;
+      box-shadow: 0 1.5px 7px #003a2b10;
+      padding: 7px 0;
+      transition: background .13s, color .13s, border .13s;
+      cursor: pointer;
+    }
+    .painel-exportacao button:hover { background: #283a5b; color: #fff; border-color: #00aaff; }
+    /* Preview & Grupos – Card refinado */
+   .main-grid {
+  display: grid;
+  grid-template-columns: 2fr 1.1fr;
+  gap: 26px;
+  max-width: 1320px;
+  width: 100%;
+  margin: 26px auto 0 auto;
+  align-items: start;
+}
+    .conversation-container {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-card);
+      padding: 17px 22px 17px 22px;
+      min-height: 300px;
+      min-width: 0;
+    }
+    .card-group {
+      background: #232f42;
+      border-radius: 13px;
+      box-shadow: 0 2.5px 14px #101b312c;
+      padding: 14px 16px 13px 16px;
+      margin-bottom: 22px;
+      transition: box-shadow .13s;
+      border: 1.1px solid #1c456e3b;
+      display: flex;
+      flex-direction: column;
+    }
+    .card-group:hover {
+      box-shadow: 0 6px 36px #00e5ff22;
+      border-color: #01c5fc3d;
+    }
+   .card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  padding-bottom: 2px;
+  border-bottom: 1.5px solid #21435f3a;
+}
+.group-id, .group-ref, .group-date, .qtd-interacoes, .badge-baixado, .tag-topico {
+  padding: 4px 16px;
+  border-radius: 12px;
+  font-size: 1.02em;
+  font-weight: 600;
+  box-shadow: 0 2px 10px #01e5ff22, 0 1px 2px #0002;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+  border: none;
+  transition: filter .15s;
+  filter: brightness(1.08) contrast(1.1);
+  display: inline-block;
+}
+.group-id {
+  background: linear-gradient(90deg,#06d6f9 0%,#0089c6 90%);
+  color: #fff;
+}
+.group-ref {
+  background: linear-gradient(90deg,#193446 0%,#345876 100%);
+  color: #68e8ff;
+}
+.group-date {
+  background: linear-gradient(90deg,#182d3d 0%,#256885 100%);
+  color: #22b8e9;
+}
+.qtd-interacoes {
+  background: linear-gradient(90deg,#1fe7b3 0%,#08ba90 100%);
+  color: #fff;
+}
+.badge-baixado {
+  background: linear-gradient(90deg,#ffe066 0%,#f4cd26 100%);
+  color: #403d12;
+}
+.tag-topico {
+  background: linear-gradient(90deg,#153a4b 0%,#1ea2a6 100%);
+  color: #67e5ff;
+}
+.card-header > *:hover {
+  filter: brightness(1.17) contrast(1.12);
+  box-shadow: 0 2px 18px #01c5fc33, 0 1px 4px #0003;
+  cursor: default;
+}
+.topicos-tags {
+  display: flex;
+  gap: 6px;
+  margin-left: 4px;
+  flex-wrap: wrap;
+}
+    .card-interacoes {
+      margin-left: 5px;
+      margin-top: 2px;
+    }
+    .card-interacao {
+      margin-bottom: 12px;
+    }
+    .codigo-agrup {
+      color: #fff;
+      background: linear-gradient(90deg,#1ee2ff 0%,#13b3c4 100%);
+      font-weight: 700;
+      font-size: .96em;
+      letter-spacing: 0.02em;
+      margin-bottom: 2px;
+      margin-top: 3px;
+      display: inline-block;
+      border-radius: 8px;
+      padding: 2.5px 13px;
+      box-shadow: 0 1.5px 8px #14e5ff32;
+      opacity: 0.92;
+    }
+    .pergunta-label, .resposta-label {
+      font-weight: 700;
+      font-size: .97em;
+      margin-bottom: 0px;
+      vertical-align: top;
+      margin-right: 7px;
+    }
+    .pergunta-label { color: #1ebeff; }
+    .question {
+      color: #18f3ff;
+      font-weight: 600;
+      font-size: .98em;
+      background: none;
+      word-break: break-word;
+      vertical-align: top;
+      display: inline;
+    }
+    .resposta-label { color: #24e0a3; }
+    .answer {
+      color: #e6fff5;
+      background: #19353c;
+      border-radius: 7px;
+      padding: 7px 12px;
+      font-size: .98em;
+      font-weight: 500;
+      display: inline-block;
+      word-break: break-word;
+      box-shadow: 0 1.5px 8px #0f28392f;
+      border: 1.1px solid #1aa8b029;
+      white-space: pre-line;
+      line-height: 1.67;
+      min-width: 50%;
+      vertical-align: top;
+      margin-left: 0;
+      margin-top: 0;
+    }
+    mark {
+      background: #fff7b6;
+      color: #00314e;
+      font-weight: 700;
+      padding: 0 2.5px;
+      border-radius: 2.5px;
+      font-size: 1em;
+    }
+    /* Gráficos */
+    .chart-box {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-card);
+      padding: 17px 16px 17px 16px;
+      min-width: 0;
+    }
+    .grafico-alternador {
+      display: flex;
+      justify-content: center;
+      gap: 9px;
+      margin-bottom: 11px;
+    }
+    .grafico-btn {
+      background: #1d374e;
+      color: #68e7ff;
+      border-radius: 8px;
+      border: none;
+      font-weight: 700;
+      font-size: .98em;
+      padding: 7px 17px;
+      cursor: pointer;
+      transition: background .12s, color .13s;
+      outline: none;
+      box-shadow: 0 1px 6px #03e4f325;
+    }
+    .grafico-btn.selected, .grafico-btn:hover { background: var(--primary); color: #fff;}
+    #enviarSugestaoBtn {
+      position: fixed;
+      right: 34px;
+      bottom: 38px;
+      background: linear-gradient(90deg,#06d6f9 0%,#19d1a8 100%);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.06em;
+      font-weight: 700;
+      box-shadow: 0 4px 20px #03e4f326;
+      padding: 14px 34px;
+      cursor: pointer;
+      z-index: 999;
+      opacity: 0.87;
+      transition: opacity .17s;
+    }
+    #enviarSugestaoBtn:hover { opacity: 1; }
+    /* Assinatura */
+    #assinatura {
+      text-align: center;
+      margin: 32px 0 0 0;
+      font-size: .97em;
+      color: #fff;
+      opacity: .79;
+    }
+    /* Responsivo */
+    @media (max-width: 1000px) {
+      .main-grid, .top-panel-row { max-width: 97vw; grid-template-columns: 1fr; }
+      .main-grid { grid-template-columns: 1fr; gap: 18px;}
+    }
+    @media (max-width: 700px) {
+      .painel-estatisticas, .painel-filtros, .painel-exportacao,
+      .conversation-container, .chart-box { padding: 11px 7vw; }
+      .card-group { padding: 10px 3vw; }
+    }
+	.marcacao-controls {
+  display: flex;
+  gap: 13px;
+  align-items: center;
+  justify-content: flex-start;
+  background: var(--card-bg2);
+  border-radius: 10px;
+  box-shadow: var(--shadow-card);
+  padding: 10px 19px 7px 12px;
+  margin-bottom: 17px;
+  margin-top: 2px;
+  font-size: 1.01em;
+}
+.marcacao-controls button {
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+  border-radius: 9px;
+  padding: 7px 18px;
+  font-size: .98em;
+  border: none;
+  cursor: pointer;
+  transition: background .13s;
+  outline: none;
+  box-shadow: 0 1.5px 7px #0028;
+}
+.marcacao-controls button:hover {
+  background: var(--primary-dark);
+}
+.contador-marcadas {
+  color: var(--badge-yellow);
+  margin-left: 13px;
+  font-size: 1.03em;
+  font-weight: 600;
+  background: #293c46;
+  border-radius: 7px;
+  padding: 6px 13px;
+  box-shadow: 0 1px 4px #0013;
+}
+.contador-marcadas-global {
+  color: #9df5b0;
+  margin-left: 10px;
+  font-size: 1.03em;
+  font-weight: 700;
+  background: #244231;
+  border-radius: 7px;
+  padding: 6px 13px;
+  box-shadow: 0 1px 4px #0013;
+}
+
+.card-interacao.marcada-interacao {
+  background: #16334a66;
+  border-left: 3.6px solid var(--primary);
+  border-radius: 7px;
+  transition: background .18s;
+  box-shadow: 0 1px 8px #12e4ff1a;
+}
+.ck-marcacao-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-right: 13px;
+  font-size: .98em;
+  color: #85eaff;
+  font-weight: 600;
+}
+.ck-marcacao {
+  accent-color: var(--primary);
+  width: 17px;
+  height: 17px;
+  margin-right: 2px;
+}
+.tag-marcada {
+  background: var(--primary-dark);
+  color: #fff;
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: .98em;
+  margin-left: 11px;
+  font-weight: 700;
+  opacity: .82;
+  letter-spacing: 0.01em;
+}
+.ck-marcacao {
+  accent-color: var(--primary);
+  width: 25px !important;
+  height: 25px !important;
+  margin-right: 2px;
+}
+.tag-marcada-topo {
+  background: #fa0070;
+  color: #fff;
+  border-radius: 8px;
+  padding: 6px 17px 6px 17px;
+  font-size: 1.04em;
+  font-weight: bold;
+  letter-spacing: .04em;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 10px #fa007033;
+  display: inline-block;
+  position: relative;
+  top: 0;
+  left: 0;
+  pointer-events: none; /* <-- adicione esta linha */
+}
+  </style>
+  <style id="chatbase-theme">
+  /* ====== Chatbase Modal • Tema Premium (escopo isolado em #chatbaseModal) ====== */
+  #chatbaseModal { --cb-bg: #0b0f18; --cb-surface: #0f1726; --cb-surface-2: #121b2e;
+    --cb-stroke: rgba(255,255,255,.08); --cb-text: #eef3ff; --cb-dim:#a5b0c2;
+    --cb-accent-1:#8b5cf6; --cb-accent-2:#22d3ee; --cb-accent-3:#06b6d4;
+    --cb-shadow: 0 30px 80px rgba(0,0,0,.45);
+    --cb-glow: 0 0 0 0 rgba(34,211,238,.0), 0 0 0 0 rgba(139,92,246,.0);
+    --cb-radius: 18px;
+    --cb-grad: linear-gradient(135deg,var(--cb-accent-1) 0%,var(--cb-accent-3) 45%,var(--cb-accent-2) 100%);
+  }
+  #chatbaseModal { backdrop-filter: blur(6px); }
+  #chatbaseModal .cb-dialog{
+    background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)) , var(--cb-surface);
+    border:1px solid var(--cb-stroke); border-radius: 22px; box-shadow: var(--cb-shadow);
+    animation: cb-pop .18s ease-out;
+  }
+  @keyframes cb-pop{ from{ transform: translateY(6px) scale(.98); opacity:.0; } to{ transform:none; opacity:1; } }
+
+  /* Cabeçalho */
+  #chatbaseModal .cb-header{
+    display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px;
+    padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  #chatbaseModal .cb-title{
+    margin:0; font-size:1.2rem; letter-spacing:.2px; color:var(--cb-text); font-weight:650;
+    background: var(--cb-grad); -webkit-background-clip:text; background-clip:text; color: transparent;
+  }
+  #chatbaseModal .cb-close{
+    all:unset; cursor:pointer; padding:8px 12px; border-radius:12px;
+    background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+    border:1px solid var(--cb-stroke); color: var(--cb-text);
+    transition: transform .12s ease, background .2s ease, box-shadow .2s ease;
+  }
+  #chatbaseModal .cb-close:hover{ transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,.35); }
+
+  /* Cards */
+  #chatbaseModal .cb-card{
+    background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+    border:1px solid var(--cb-stroke); border-radius: var(--cb-radius); padding:12px;
+  }
+  #chatbaseModal h3{ margin:0 0 8px 0; font-size:1.0rem; color:var(--cb-text); }
+
+  /* Inputs + labels */
+  #chatbaseModal label span{ color:var(--cb-dim); font-size:.92rem; }
+  #chatbaseModal input[type="text"],
+  #chatbaseModal input[type="password"],
+  #chatbaseModal input[type="number"]{
+    background: var(--cb-surface-2); color: var(--cb-text); border:1px solid var(--cb-stroke);
+    border-radius:12px; padding:10px 12px; outline:none; transition: box-shadow .15s ease, border-color .15s ease;
+  }
+  #chatbaseModal input::placeholder{ color:#7f8aa0; }
+  #chatbaseModal input:focus{
+    border-color: rgba(34,211,238,.55);
+    box-shadow: 0 0 0 3px rgba(34,211,238,.18), inset 0 0 0 1px rgba(255,255,255,.04);
+  }
+  #chatbaseModal input[type="checkbox"]{ accent-color: var(--cb-accent-1); }
+
+  /* Botões */
+  #chatbaseModal .cb-btn{
+    all:unset; display:inline-flex; align-items:center; justify-content:center; cursor:pointer;
+    padding:10px 14px; border-radius:12px; font-weight:600; letter-spacing:.2px; gap:8px;
+    transition: transform .12s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
+    user-select:none;
+  }
+  #chatbaseModal .cb-btn:disabled{ opacity:.6; cursor:not-allowed; transform:none !important; box-shadow:none !important; }
+  #chatbaseModal .cb-btn-ghost{
+    background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+    border:1px solid var(--cb-stroke); color:var(--cb-text);
+  }
+  #chatbaseModal .cb-btn-ghost:hover{ transform: translateY(-1px); box-shadow: 0 10px 28px rgba(0,0,0,.35); }
+  #chatbaseModal .cb-btn-primary{
+    background: var(--cb-grad); color:#05121a; border:1px solid transparent; box-shadow: 0 10px 28px rgba(34,211,238,.25);
+  }
+  #chatbaseModal .cb-btn-primary:hover{ transform: translateY(-1px); box-shadow: 0 12px 34px rgba(34,211,238,.35); }
+
+  /* Lista de grupos */
+  #chatbaseModal .cb-group-list{
+    display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:10px;
+    max-height: 260px; overflow:auto; padding:8px; border:1px solid var(--cb-stroke); border-radius:14px;
+    background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
+  }
+  #chatbaseModal .cb-group-item{
+    display:flex; align-items:center; gap:10px; padding:10px 12px;
+    background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+    border:1px solid var(--cb-stroke); border-radius:12px;
+    transition: border-color .2s ease, transform .12s ease, box-shadow .2s ease;
+  }
+  #chatbaseModal .cb-group-item:hover{
+    transform: translateY(-1px); border-color: rgba(139,92,246,.45);
+    box-shadow: 0 8px 26px rgba(0,0,0,.35);
+  }
+  #chatbaseModal .cb-group-item b{ color:var(--cb-text); }
+  #chatbaseModal .cb-group-item small{ color:#90a1b7; }
+
+  /* Barra de progresso */
+  #chatbaseModal .cb-progress-wrap{ display:flex; align-items:center; gap:12px; width:100%; }
+  #chatbaseModal progress{ appearance:none; -webkit-appearance:none; width:100%; height:14px; border:none; border-radius:999px; overflow:hidden;
+    background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)); }
+  #chatbaseModal progress::-webkit-progress-bar{
+    background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
+  }
+  #chatbaseModal progress::-webkit-progress-value{
+    background: var(--cb-grad); border-radius:999px; box-shadow: 0 0 18px rgba(34,211,238,.35);
+  }
+  #chatbaseModal progress::-moz-progress-bar{
+    background: var(--cb-grad); border-radius:999px;
+  }
+  #chatbaseModal .cb-progress-text{ min-width:170px; text-align:right; color:var(--cb-dim); }
+
+  /* Resultados */
+  #chatbaseModal .cb-results{
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:.92em;
+    background: #0a111d; border:1px solid var(--cb-stroke); border-radius:12px; padding:12px;
+    max-height:300px; overflow:auto; color:#dce6ff;
+  }
+
+  /* Utilidades */
+  #chatbaseModal .row{ display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; }
+  #chatbaseModal .space{ height:10px; }
+</style>
+<style id="app-premium-theme">
+  /* ====== App • Tema Premium (harmonizado com o modal) ====== */
+  :root{
+    /* Paleta alinhada ao modal */
+    --primary: #8b5cf6;
+    --primary-dark: #6d43e2;
+    --bg: #0b0f18;
+    --card-bg: #0f1726;
+    --card-bg2: #111b2d;
+    --text: #eef3ff;
+    --text-muted: #a5b0c2;
+    --input-bg: #121b2e;
+    --input-border: rgba(255,255,255,.08);
+    --input-border-focus: #22d3ee;
+    --radius: 22px;
+    --shadow: 0 30px 80px rgba(0,0,0,.45);
+    --shadow-card: 0 12px 34px rgba(3,10,24,.45);
+    --grad: linear-gradient(135deg,#8b5cf6 0%,#06b6d4 45%,#22d3ee 100%);
+    --stroke: rgba(255,255,255,.08);
+  }
+
+  /* Fundo com profundidade (não quebra nada existente) */
+  html, body{
+    background:
+      radial-gradient(1200px 800px at 20% -10%, rgba(139,92,246,.14), transparent 55%),
+      radial-gradient(900px 700px at 120% 30%, rgba(34,211,238,.10), transparent 60%),
+      #0b0f18;
+    color: var(--text);
+  }
+
+  /* Título principal com gradiente igual ao modal */
+  .kiara-title{
+    color: transparent !important;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    text-shadow: none;
+    letter-spacing: .05em;
+  }
+  .assinatura-hdsp{ color:#9cc8ff; opacity:.75; }
+
+  /* “Cartões”/Contêineres principais (mesmo vidro do modal) */
+  .upload-section,
+  .painel-estatisticas,
+  .painel-filtros,
+  .painel-exportacao,
+  .conversation-container,
+  .chart-box{
+    background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)), var(--card-bg);
+    border:1px solid var(--stroke);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Grid principal e painéis com respiro */
+  .top-panel-row{ gap:26px; }
+  .painel-estatisticas, .painel-filtros, .painel-exportacao{
+    padding:16px 18px 14px 18px;
+  }
+  .conversation-container{ padding:18px 22px; }
+  .chart-box{ padding:16px; }
+
+  /* Labels/títulos de seções */
+  .painel-estatisticas .estat-card .estat-label,
+  .filtros-wrap label{ color:#cfe5ff; opacity:.9; }
+
+  /* Inputs/Selects (filtros) com foco “neon” */
+  .filtros-wrap input, .filtros-wrap select{
+    background: var(--input-bg) !important;
+    border:1px solid var(--input-border) !important;
+    color: var(--text) !important;
+    border-radius: 12px !important;
+    padding:10px 12px !important;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.03);
+    transition: box-shadow .15s ease, border-color .15s ease, background .15s ease;
+  }
+  .filtros-wrap input:focus, .filtros-wrap select:focus{
+    border-color: var(--input-border-focus) !important;
+    box-shadow: 0 0 0 3px rgba(34,211,238,.18), inset 0 0 0 1px rgba(255,255,255,.04);
+    background:#0f2137 !important;
+  }
+  .filtros-wrap input::placeholder{ color:#8aa5c6; opacity:.9; }
+
+  /* Botões — padrão premium (escopado por contexto para não afetar o modal) */
+  .painel-filtros button,
+  .filtros-btns-box button,
+  .painel-exportacao button,
+  .marcacao-controls button,
+  #importarOutroBtn,
+  .file-label,
+  #enviarSugestaoBtn{
+    background: var(--grad) !important;
+    color:#05121a !important;
+    border:1px solid transparent !important;
+    border-radius:12px !important;
+    font-weight:700 !important;
+    box-shadow: 0 12px 34px rgba(34,211,238,.25);
+    letter-spacing:.02em;
+    transition: transform .12s ease, box-shadow .2s ease, filter .2s ease;
+  }
+  .painel-filtros button:hover,
+  .filtros-btns-box button:hover,
+  .painel-exportacao button:hover,
+  .marcacao-controls button:hover,
+  #importarOutroBtn:hover,
+  .file-label:hover,
+  #enviarSugestaoBtn:hover{
+    transform: translateY(-1px);
+    box-shadow: 0 16px 40px rgba(34,211,238,.35);
+    filter: brightness(1.03);
+  }
+  /* Botões “secundários” (quando você quiser fundo escuro) */
+  .painel-exportacao button{
+    background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03)) !important;
+    color: #e1edff !important;
+    border:1px solid var(--stroke) !important;
+    box-shadow: 0 10px 28px rgba(0,0,0,.35);
+  }
+  .painel-exportacao button:hover{
+    border-color: rgba(139,92,246,.45) !important;
+  }
+
+  /* Cartões de grupos e interações */
+  .card-group{
+    background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+    border:1px solid var(--stroke);
+    border-radius: 16px;
+    box-shadow: 0 10px 26px rgba(0,0,0,.35);
+  }
+  .card-header{
+    border-bottom:1px solid rgba(255,255,255,.06);
+    padding-bottom:8px;
+  }
+
+  /* Badges/etiquetas de cabeçalho com brilho sutil */
+  .group-id, .group-ref, .group-date, .qtd-interacoes, .badge-baixado, .tag-topico{
+    border:1px solid rgba(255,255,255,.08) !important;
+    box-shadow: 0 6px 14px rgba(8,35,68,.35), inset 0 0 0 1px rgba(255,255,255,.03) !important;
+    filter:none !important;
+  }
+  .group-id{
+    background: var(--grad) !important; color:#05121a !important;
+  }
+  .group-ref{
+    background: linear-gradient(90deg,#14263a 0%,#1e3b56 100%) !important; color:#cde9ff !important;
+  }
+  .group-date{
+    background: linear-gradient(90deg,#112233 0%,#18405a 100%) !important; color:#9ddcff !important;
+  }
+  .qtd-interacoes{
+    background: linear-gradient(90deg,#1fe7b3 0%,#06b48e 100%) !important; color:#06221b !important;
+  }
+  .badge-baixado{
+    background: linear-gradient(90deg,#ffe066 0%,#f4cd26 100%) !important; color:#403d12 !important;
+  }
+  .tag-topico{
+    background: linear-gradient(90deg,#153a4b 0%,#1ea2a6 100%) !important; color:#bfefff !important;
+    border-color: rgba(34,211,238,.25) !important;
+  }
+
+  /* Código do agrupamento */
+  .codigo-agrup{
+    background: linear-gradient(90deg,#1ee2ff 0%,#13b3c4 100%) !important;
+    color:#051a22 !important;
+    border:1px solid rgba(255,255,255,.08);
+    box-shadow: 0 8px 20px rgba(19,179,196,.24);
+  }
+
+  /* Texto da pergunta & resposta */
+  .pergunta-label{ color:#69dbff !important; }
+  .question{ color:#cdeaff !important; font-weight:600; }
+  .resposta-label{ color:#2fe9b4 !important; }
+  .answer{
+    background: #0f2838 !important;
+    border:1px solid rgba(34,211,238,.15) !important;
+    color:#e9fbff !important;
+    border-radius:12px !important;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.03), 0 6px 16px rgba(5,36,54,.35) !important;
+  }
+  mark{
+    background:#fff7b6; color:#08263c; border-radius:4px; padding:0 3px;
+  }
+
+  /* Controles de marcação */
+  .marcacao-controls{
+    background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+    border:1px solid var(--stroke);
+    border-radius: 14px;
+    box-shadow: var(--shadow-card);
+  }
+  .ck-marcacao{ accent-color: var(--primary); }
+
+  /* Botão flutuante “Enviar Sugestão” */
+  #enviarSugestaoBtn{
+    background: var(--grad) !important;
+    color:#05121a !important;
+    border:1px solid transparent !important;
+    box-shadow: 0 18px 40px rgba(34,211,238,.35);
+  }
+
+  /* Painel inicial (upload) */
+  .file-label{ font-weight:700; }
+  .file-name{ color:#b1d7ff !important; }
+  .msg-inicial{ color:#a8c2dd !important; }
+
+  /* Gráfico: botões de alternância */
+  .grafico-btn{
+    background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03)) !important;
+    color:#e1edff !important;
+    border:1px solid var(--stroke) !important;
+    box-shadow: 0 10px 28px rgba(0,0,0,.35);
+  }
+  .grafico-btn.selected, .grafico-btn:hover{
+    background: var(--grad) !important;
+    color:#05121a !important;
+    border-color: transparent !important;
+    box-shadow: 0 12px 34px rgba(34,211,238,.35) !important;
+  }
+
+  /* Responsivo: mantém o ar premium */
+  @media (max-width: 1000px){
+    .painel-estatisticas, .painel-filtros, .painel-exportacao,
+    .conversation-container, .chart-box{ padding:14px; }
+  }
+</style>
+<style id="app-premium-theme">
+  /* ====== Visuais Premium para o Programa ====== */
+  :root {
+    --primary: #8b5cf6; /* Destaque roxo */
+    --primary-dark: #6d43e2; /* Roxo escuro */
+    --bg: #0b0f18; /* Fundo escuro elegante */
+    --card-bg: #0f1726; /* Fundo dos cartões */
+    --card-bg2: #111b2d; /* Fundo mais escuro para profundidade */
+    --text: #eef3ff; /* Texto claro para contraste */
+    --text-muted: #a5b0c2; /* Texto suave */
+    --input-bg: #121b2e; /* Fundo dos inputs */
+    --input-border: rgba(255,255,255,.08); /* Borda dos inputs */
+    --input-border-focus: #22d3ee; /* Borda em foco */
+    --radius: 22px; /* Bordas arredondadas */
+    --shadow: 0 30px 80px rgba(0,0,0,.45); /* Sombra suave */
+    --shadow-card: 0 12px 34px rgba(3,10,24,.45); /* Sombra nos cartões */
+    --grad: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 45%, #22d3ee 100%); /* Gradiente moderno */
+    --stroke: rgba(255,255,255,.08); /* Detalhes finos em bordas */
+  }
+
+  /* === Corpo e Layout === */
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    font-size: 17px;
+    line-height: 1.57;
+    letter-spacing: 0.01em;
+  }
+
+  header {
+    padding: 24px 0 17px;
+    text-align: center;
+  }
+  
+  .kiara-title {
+    margin: 0;
+    font-size: 2.3em;
+    font-weight: 700;
+    letter-spacing: .05em;
+    color: var(--primary);
+    text-shadow: 0 3px 32px #00e5ff17;
+  }
+
+  .assinatura-hdsp {
+    font-size: 1.07em;
+    color: #64d9ff;
+    font-weight: 600;
+    margin-top: 0px;
+    opacity: .70;
+  }
+
+  /* === Cartões e Contêineres === */
+  .upload-section,
+  .painel-estatisticas,
+  .painel-filtros,
+  .painel-exportacao,
+  .conversation-container,
+  .chart-box {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    padding: 18px;
+  }
+
+  .painel-estatisticas, .painel-filtros, .painel-exportacao {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    min-width: 0;
+    min-height: 1px;
+  }
+
+  /* Botões de filtro e exportação */
+  .painel-filtros button, .filtros-btns-box button {
+    background: var(--primary);
+    color: #fff;
+    font-weight: 700;
+    border-radius: 12px;
+    padding: 10px 14px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 10px 28px rgba(34,211,238,.25);
+    transition: background .15s ease, box-shadow .2s ease;
+  }
+
+  .painel-filtros button:hover, .filtros-btns-box button:hover {
+    background: var(--primary-dark);
+    box-shadow: 0 12px 34px rgba(34,211,238,.35);
+  }
+
+  /* === Grupos e Cards === */
+  .card-group {
+    background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+    border: 1px solid var(--stroke);
+    border-radius: 16px;
+    box-shadow: 0 10px 26px rgba(0,0,0,.35);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    border-bottom: 1.5px solid #21435f3a;
+  }
+
+  /* Badges de interações, tags, e grupos */
+  .group-id, .group-ref, .group-date, .qtd-interacoes, .badge-baixado, .tag-topico {
+    background: var(--grad);
+    border-radius: 12px;
+    padding: 4px 16px;
+    font-size: 1.02em;
+    font-weight: 600;
+    display: inline-block;
+    box-shadow: 0 2px 10px #01e5ff22, inset 0 0 0 1px rgba(255,255,255,.03);
+  }
+
+  .group-id {
+    background: linear-gradient(90deg,#06d6f9 0%,#0089c6 90%);
+    color: #fff;
+  }
+
+  /* === Respostas e Perguntas === */
+  .pergunta-label {
+    color: #69dbff;
+    font-weight: 700;
+  }
+
+  .question {
+    color: #cdeaff;
+    font-weight: 600;
+  }
+
+  .resposta-label {
+    color: #2fe9b4;
+    font-weight: 700;
+  }
+
+  .answer {
+    background: #0f2838;
+    color: #e9fbff;
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.03), 0 6px 16px rgba(5,36,54,.35);
+  }
+
+  mark {
+    background: #fff7b6;
+    color: #00314e;
+    font-weight: 700;
+    padding: 0 2.5px;
+    border-radius: 2.5px;
+  }
+
+  /* === Gráficos === */
+  .grafico-alternador {
+    display: flex;
+    justify-content: center;
+    gap: 9px;
+    margin-bottom: 11px;
+  }
+
+  .grafico-btn {
+    background: #1d374e;
+    color: #68e7ff;
+    border-radius: 8px;
+    border: none;
+    font-weight: 700;
+    font-size: .98em;
+    padding: 7px 17px;
+    cursor: pointer;
+    transition: background .12s, color .13s;
+  }
+
+  .grafico-btn.selected, .grafico-btn:hover {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  /* === Responsivo === */
+  @media (max-width: 1000px) {
+    .painel-estatisticas, .painel-filtros, .painel-exportacao,
+    .conversation-container, .chart-box {
+      padding: 14px;
+    }
+
+    .card-group {
+      padding: 10px 3vw;
+    }
+  }
+
+  /* Responsivo Mobile */
+  @media (max-width: 700px) {
+    .painel-estatisticas, .painel-filtros, .painel-exportacao,
+    .conversation-container, .chart-box {
+      padding: 11px 7vw;
+    }
+
+    .card-group {
+      padding: 10px 3vw;
+    }
+  }
+</style>
+<style id="chatbase-theme">
+  /* ====== Chatbase Modal • Tema Premium (escopo isolado em #chatbaseModal) ====== */
+  #chatbaseModal { --cb-bg: #0b0f18; --cb-surface: #0f1726; --cb-surface-2: #121b2e;
+    --cb-stroke: rgba(255,255,255,.08); --cb-text: #eef3ff; --cb-dim:#a5b0c2;
+    --cb-accent-1:#8b5cf6; --cb-accent-2:#22d3ee; --cb-accent-3:#06b6d4;
+    --cb-shadow: 0 30px 80px rgba(0,0,0,.45);
+    --cb-glow: 0 0 0 0 rgba(34,211,238,.0), 0 0 0 0 rgba(139,92,246,.0);
+    --cb-radius: 18px;
+    --cb-grad: linear-gradient(135deg,var(--cb-accent-1) 0%,var(--cb-accent-3) 45%,var(--cb-accent-2) 100%);
+  }
+  #chatbaseModal { backdrop-filter: blur(6px); }
+  #chatbaseModal .cb-dialog{
+    background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)) , var(--cb-surface);
+    border:1px solid var(--cb-stroke); border-radius: 22px; box-shadow: var(--cb-shadow);
+    animation: cb-pop .18s ease-out;
+  }
+  @keyframes cb-pop{ from{ transform: translateY(6px) scale(.98); opacity:.0; } to{ transform:none; opacity:1; } }
+
+  /* Cabeçalho */
+  #chatbaseModal .cb-header{
+    display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px;
+    padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  #chatbaseModal .cb-title{
+    margin:0; font-size:1.2rem; letter-spacing:.2px; color:var(--cb-text); font-weight:650;
+    background: var(--cb-grad); -webkit-background-clip:text; background-clip:text; color: transparent;
+  }
+  #chatbaseModal .cb-close{
+    all:unset; cursor:pointer; padding:8px 12px; border-radius:12px;
+    background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+    border:1px solid var(--cb-stroke); color: var(--cb-text);
+    transition: transform .12s ease, background .2s ease, box-shadow .2s ease;
+  }
+  #chatbaseModal .cb-close:hover{ transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,.35); }
+
+  /* Cards */
+  #chatbaseModal .cb-card{
+    background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+    border:1px solid var(--cb-stroke); border-radius: var(--cb-radius); padding:12px;
+  }
+  #chatbaseModal h3{ margin:0 0 8px 0; font-size:1.0rem; color:var(--cb-text); }
+
+  /* Inputs + labels */
+  #chatbaseModal label span{ color:var(--cb-dim); font-size:.92rem; }
+  #chatbaseModal input[type="text"],
+  #chatbaseModal input[type="password"],
+  #chatbaseModal input[type="number"]{
+    background: var(--cb-surface-2); color: var(--cb-text); border:1px solid var(--cb-stroke);
+    border-radius:12px; padding:10px 12px; outline:none; transition: box-shadow .15s ease, border-color .15s ease;
+  }
+  #chatbaseModal input::placeholder{ color:#7f8aa0; }
+  #chatbaseModal input:focus{
+    border-color: rgba(34,211,238,.55);
+    box-shadow: 0 0 0 3px rgba(34,211,238,.18), inset 0 0 0 1px rgba(255,255,255,.04);
+  }
+  #chatbaseModal input[type="checkbox"]{ accent-color: var(--cb-accent-1); }
+
+  /* Botões */
+  #chatbaseModal .cb-btn{
+    all:unset; display:inline-flex; align-items:center; justify-content:center; cursor:pointer;
+    padding:10px 14px; border-radius:12px; font-weight:600; letter-spacing:.2px; gap:8px;
+    transition: transform .12s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
+    user-select:none;
+  }
+  #chatbaseModal .cb-btn:disabled{ opacity:.6; cursor:not-allowed; transform:none !important; box-shadow:none !important; }
+  #chatbaseModal .cb-btn-ghost{
+    background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+    border:1px solid var(--cb-stroke); color:var(--cb-text);
+  }
+  #chatbaseModal .cb-btn-ghost:hover{ transform: translateY(-1px); box-shadow: 0 10px 28px rgba(0,0,0,.35); }
+  #chatbaseModal .cb-btn-primary{
+    background: var(--cb-grad); color:#05121a; border:1px solid transparent; box-shadow: 0 10px 28px rgba(34,211,238,.25);
+  }
+  #chatbaseModal .cb-btn-primary:hover{ transform: translateY(-1px); box-shadow: 0 12px 34px rgba(34,211,238,.35); }
+
+  /* Lista de grupos */
+  #chatbaseModal .cb-group-list{
+    display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:10px;
+    max-height: 260px; overflow:auto; padding:8px; border:1px solid var(--cb-stroke); border-radius:14px;
+    background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
+  }
+  #chatbaseModal .cb-group-item{
+    display:flex; align-items:center; gap:10px; padding:10px 12px;
+    background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+    border:1px solid var(--cb-stroke); border-radius:12px;
+    transition: border-color .2s ease, transform .12s ease, box-shadow .2s ease;
+  }
+  #chatbaseModal .cb-group-item:hover{
+    transform: translateY(-1px); border-color: rgba(139,92,246,.45);
+    box-shadow: 0 8px 26px rgba(0,0,0,.35);
+  }
+  #chatbaseModal .cb-group-item b{ color:var(--cb-text); }
+  #chatbaseModal .cb-group-item small{ color:#90a1b7; }
+
+  /* Barra de progresso */
+  #chatbaseModal .cb-progress-wrap{ display:flex; align-items:center; gap:12px; width:100%; }
+  #chatbaseModal progress{ appearance:none; -webkit-appearance:none; width:100%; height:14px; border:none; border-radius:999px; overflow:hidden;
+    background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)); }
+  #chatbaseModal progress::-webkit-progress-bar{
+    background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
+  }
+  #chatbaseModal progress::-webkit-progress-value{
+    background: var(--cb-grad); border-radius:999px; box-shadow: 0 0 18px rgba(34,211,238,.35);
+  }
+  #chatbaseModal progress::-moz-progress-bar{
+    background: var(--cb-grad); border-radius:999px;
+  }
+  #chatbaseModal .cb-progress-text{ min-width:170px; text-align:right; color:var(--cb-dim); }
+
+  /* Resultados */
+  #chatbaseModal .cb-results{
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:.92em;
+    background: #0a111d; border:1px solid var(--cb-stroke); border-radius:12px; padding:12px;
+    max-height:300px; overflow:auto; color:#dce6ff;
+  }
+
+  /* Utilidades */
+  #chatbaseModal .row{ display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; }
+  #chatbaseModal .space{ height:10px; }
+</style>
+</head>
+<body>
+  <header>
+    <h1 class="kiara-title">Curadoria Pro - Kiara</h1>
+    <div class="assinatura-hdsp">HDSP Corp. Ver. 5.5</div>
+  </header>
+  <div id="container-inicial" class="container-centralizado-inicial">
+    <div class="upload-section" id="uploadSection">
+      <label for="fileInput" class="file-label" tabindex="0">Escolher arquivo JSON</label>
+      <input type="file" id="fileInput" accept=".json" style="display:none;" />
+      <span class="file-name" id="fileName"></span>
+    </div>
+    <div id="mensagem-inicial" class="msg-inicial">
+      Importe um arquivo JSON para visualizar, filtrar e exportar suas interações agrupadas.
+    </div>
+  </div>
+  <div class="top-panel-row" id="topPanelRow" style="display:none;">
+    <div class="painel-estatisticas" id="painel-estatisticas" style="display:none;">
+      <div class="estat-card">
+        <span class="estat-label">Total de Mensagens:</span>
+        <span id="estat-total-msgs" class="estat-valor">0</span>
+      </div>
+      <div class="estat-card">
+        <span class="estat-label">Total de Grupos:</span>
+        <span id="estat-total-grupos" class="estat-valor">0</span>
+      </div>
+      <div class="estat-card">
+        <span class="estat-label">Respostas Revisadas:</span>
+        <span id="estat-total-revisadas" class="estat-valor">0</span>
+      </div>
+      <div class="estat-card estat-data" id="estat-data" style="display:none;">
+        <span class="estat-label">Data:</span>
+        <span id="fileDateRange" class="estat-valor"></span>
+      </div>
+	  <div id="importarOutroContainer" style="width:100%;margin-top:12px;display:none;flex-direction:column;align-items:flex-start;">
+  <button id="importarOutroBtn" style="background:#184e67;color:#fff;font-weight:600;border-radius:8px;padding:9px 21px;font-size:.99em;border:none;box-shadow:0 1.5px 7px #003a2b10;cursor:pointer;margin-bottom:3px;">Importar outro arquivo</button>
+  <span id="nomeArquivoImportado" style="color:#8fe7ff;font-size:.97em;font-weight:500;margin-top:2px;word-break:break-all;"></span>
+</div>
+    </div>
+    <div class="painel-filtros" id="painel-filtros" style="display:none;">
+      <div class="filtros-wrap">
+        <div>
+          <label for="filtroPergunta">Pergunta contém:</label>
+          <input type="text" id="filtroPergunta" placeholder="Filtrar perguntas..." autocomplete="off">
+        </div>
+        <div>
+          <label for="filtroResposta">Resposta contém:</label>
+          <input type="text" id="filtroResposta" placeholder="Filtrar respostas..." autocomplete="off">
+        </div>
+        <div>
+          <label for="filtroTopicos">Tópico:</label>
+          <select id="filtroTopicos" size="1">
+            <option value="">Todos</option>
+          </select>
+        </div>
+      </div>
+      <div class="filtros-btns-box">
+        <span id="qtdFiltro" class="filtros-qtd">0</span>
+        <button id="limparFiltrosBtn" type="button">Limpar</button>
+        <button id="downloadPerguntasBtn" style="display:none;">Baixar Perguntas</button>
+        <button id="downloadRespostasBtn" style="display:none;">Baixar Respostas</button>
+        <button id="downloadAmbosBtn" style="display:none;min-width:124px;">Baixar Perguntas + Respostas</button>
+      </div>
+    </div>
+    <div class="painel-exportacao" id="painel-exportacao" style="display:none;">
+      <button id="downloadBtn" style="display:none;cursor:pointer;">Exportar (.json) Completo</button>
+      <button id="downloadZipBtn" style="display:none;cursor:pointer;">Exportar (.json) por grupo</button>
+      <button id="showUserSelectBtn" style="display:none;cursor:pointer;">Exportar (.json) grupos selecionados</button>
+      <button id="downloadIdsBtn" style="display:none;cursor:pointer;">Exportar IDs baixados</button>
+	  <button id="exportTopicosBtn" style="cursor:pointer;">Exportar Relatório por Tópicos (CSV)</button>
+	  <button id="exportMarcadasBtn" style="cursor:pointer;">Exportar Marcadas (CSV)</button>
+	  <button id="chatbasePanelBtn" style="cursor:pointer;">Chatbase • Envio/Config</button>
+    </div>
+  </div>
+<!-- === CHATBASE: MODAL • VISUAL PREMIUM === -->
+<div id="chatbaseModal" style="display:none; position:fixed; inset:0; background:rgba(3,7,18,.65); z-index:9999;">
+  <div class="cb-dialog" style="width:min(1100px,98vw); max-height:92vh; overflow:auto; margin:4vh auto; padding:18px 18px 22px;">
+    <div class="cb-header">
+      <h2 class="cb-title">Chatbase • Envio/Config</h2>
+      <button class="cb-close" id="chatbaseCloseBtn">Fechar</button>
+    </div>
+
+    <!-- TOPO: campos lado a lado -->
+    <div class="cb-card">
+      <div class="row">
+        <label style="display:grid; gap:6px; min-width:220px; flex:1;">
+          <span>Chatbot ID</span>
+          <input id="cbChatbotId" type="text" placeholder="Digitar o ID do Chatbot">
+        </label>
+        <label style="display:grid; gap:6px; min-width:220px; flex:1;">
+          <span>Chave API</span>
+          <input id="cbApiKey" type="password" placeholder="Chave API">
+        </label>
+        <label style="display:grid; gap:6px; min-width:260px; flex:1;">
+          <span>Proxy (Não utilizamos)</span>
+          <input id="cbProxyUrl" type="text" placeholder="Não utilizar - Humberto">
+        </label>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <input id="cbRemember" type="checkbox" checked><label for="cbRemember" style="color:var(--cb-dim);">Lembrar</label>
+        </div>
+        <div class="row" style="gap:8px;">
+          <button class="cb-btn cb-btn-ghost" id="cbSaveBtn">Salvar</button>
+          <button class="cb-btn cb-btn-ghost" id="cbClearBtn">Limpar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="space"></div>
+
+    <!-- GRUPOS + INTERVALO -->
+    <div class="cb-card">
+      <div class="row" style="justify-content:space-between;">
+        <h3>Grupos</h3>
+        <div class="row" style="gap:8px;">
+          <button class="cb-btn cb-btn-ghost" id="cbMarkAllGroupsBtn">Marcar todos</button>
+          <button class="cb-btn cb-btn-ghost" id="cbUnmarkAllGroupsBtn">Desmarcar todos</button>
+        </div>
+      </div>
+
+      <div id="cbGroupList" class="cb-group-list"></div>
+
+      <div class="row" style="margin-top:10px;">
+        <label style="display:grid; gap:6px;">
+          <span>Intervalo (por grupo) — De</span>
+          <input id="cbRangeStart" type="number" min="1" placeholder="1" style="width:120px;">
+        </label>
+        <label style="display:grid; gap:6px;">
+          <span>Até</span>
+          <input id="cbRangeEnd" type="number" min="1" placeholder="(todas)" style="width:140px;">
+        </label>
+        <div style="color:var(--cb-dim);">Em branco = envia <b>todas</b> as interações. Limite por envio: <b>8000</b> caracteres (lotes automáticos).</div>
+      </div>
+    </div>
+
+    <div class="space"></div>
+
+    <!-- ENVIO + PROGRESSO -->
+    <div class="row">
+      <button class="cb-btn cb-btn-primary" id="cbSendSelectedGroupsBtn">Enviar Grupos Selecionados</button>
+      <div class="cb-progress-wrap">
+        <progress id="cbProgress" max="100" value="0"></progress>
+        <span id="cbProgressText" class="cb-progress-text">Aguardando…</span>
+      </div>
+    </div>
+
+    <div class="space"></div>
+
+    <!-- RESULTADOS -->
+    <div>
+      <h3>Resultados</h3>
+      <div id="cbResults" class="cb-results"></div>
+    </div>
+  </div>
+</div>
+<!-- === /CHATBASE: MODAL • VISUAL PREMIUM === -->
+  <main class="main-grid" id="mainGrid" style="display:none;">
+    <div class="conversation-container" id="result"></div>
+    <div class="chart-box">
+      <div class="grafico-alternador">
+        <button id="btnGrupo" class="grafico-btn selected">Por Grupo</button>
+        <button id="btnTopicos" class="grafico-btn">Por Tópicos</button>
+      </div>
+      <div id="chartsPorGrupo" style="display:;">
+        <canvas id="barChartGrupo" style="max-height:170px;display:block;margin-bottom:10px;"></canvas>
+        <canvas id="pieChartGrupo"></canvas>
+      </div>
+      <div id="chartsPorTopico" style="display:none;">
+        <canvas id="barChartTopicos" style="max-height:170px;display:block;margin-bottom:10px;"></canvas>
+        <canvas id="pieChartTopicos"></canvas>
+      </div>
+    </div>
+  </main>
+  <button id="enviarSugestaoBtn" title="Enviar sugestão por e-mail">Enviar Sugestão</button>
+  <div id="assinatura">
+    <span style="font-weight:600;">HDSP Corp. Ver. 5.5</span>
+  </div>
+  <script>
+const $ = id => document.getElementById(id);
+let allData = [], agrupamentos = [], grupoMap = {}, allTops = [],
+    perguntasFiltradas = [], respostasFiltradas = [], ambosFiltrados = [],
+    idsBaixados = [], ultimaSelecaoGrupos = [],
+    chartBarra = null, chartGrupo = null, chartTopicos = null, chartTopicosBarra = null;
+let arquivoImportado = false;
+let filtroGrupoSelecionado = "";
+let filtroTopicoSelecionado = "";
+let nomeArquivo = "";
+let interacoesMarcadas = []; // <--- Interações marcadas por código único
+
+function atualizarContadorMarcadasNaTela() {
+  try {
+    // contador visível (respeita o filtro atual)
+    const visiveis = Array.from(document.querySelectorAll(".ck-marcacao"))
+      .map(x => x.getAttribute("data-codigo"));
+    const totalVisiveis = visiveis.filter(c => interacoesMarcadas.includes(c)).length;
+    //const el = document.querySelector(".contador-marcadas b");
+    // if (el) el.textContent = totalVisiveis;
+
+    // contador global (independe de filtro)
+    const elg = document.querySelector(".contador-marcadas-global b");
+    if (elg) elg.textContent = [...new Set(interacoesMarcadas)].length;
+  } catch(e) {
+    console.warn("Falha ao atualizar contadores:", e);
+  }
+}
+
+$("fileInput").addEventListener("change", async function(ev) {
+  if (arquivoImportado) return;
+  if (!this.files[0]) return;
+  resetUI();
+  interacoesMarcadas = []; // <-- Adicione aqui!
+  const file = this.files[0];
+  $("fileName").textContent = file.name;
+  nomeArquivo = file.name;
+  let raw;
+  try { raw = await file.text(); }
+  catch { alert("Falha ao ler arquivo."); return; }
+  let data;
+  try { data = JSON.parse(raw); }
+  catch { alert("Arquivo inválido."); return; }
+
+  allData = []; grupoMap = {}; agrupamentos = []; allTops = []; idsBaixados = [];
+  let totalMsgs = 0, totalRevisadas = 0, topicMap = {};
+
+  let start = data.startDateStr || data.start_date || "";
+  let end = data.endDateStr || data.end_date || "";
+  // Normaliza datas do JSON (no formato AAAA-MM-DD)
+function onlyDateStr(dt) {
+  if (!dt) return "";
+  if (dt.length >= 10) return dt.substring(0,10);
+  return dt;
+}
+let startDateFilter = onlyDateStr(start);
+let endDateFilter = onlyDateStr(end);
+
+  if (start && end) {
+    $("fileDateRange").textContent = (start === end) ? start : `${start} a ${end}`;
+    $("estat-data").style.display = "";
+  } else {
+    $("estat-data").style.display = "none";
+    $("fileDateRange").textContent = "";
+  }
+
+  let tempOutput = [];
+  let rawArr = Array.isArray(data) ? data : (data.grupos || data.conversations || data.items || data.interacoes || []);
+  if (!Array.isArray(rawArr)) rawArr = Object.values(rawArr);
+
+  for(let i=0; i<rawArr.length; i++) {
+    let g = rawArr[i];
+    let grupoId = String(g.group_id || g.id || g.account_id || g.nome || i+1);
+    let codigoAgrup = g.grupo || g.codigo_agrupamento || g.codigo || g.group_code || `GR${(i+1).toString().padStart(2,"0")}`;
+    let createdAt = g.data_horario || g.created_at || (g.messages?.[0]?.created_at);
+	// FILTRO DE DATAS IGUAL AO 5.2:
+let dstr = "";
+if (createdAt) {
+  let dt = new Date(createdAt);
+  if (!isNaN(dt.getTime())) {
+    // Ajusta para horário de Brasília (UTC-3)
+    dt = new Date(dt.getTime() - (3 * 60 * 60 * 1000));
+    dstr = dt.toISOString().substring(0,10);
+  }
+}
+// Filtro: considera apenas se dstr está entre startDateFilter e endDateFilter (inclusive)
+if (
+  (startDateFilter && dstr && dstr < startDateFilter) ||
+  (endDateFilter && dstr && dstr > endDateFilter)
+) continue;
+
+    let topicos = [];
+    if (Array.isArray(g.topics)) {
+      topicos = g.topics.map(t=>String(t));
+    } else if (Array.isArray(g.topicos)) {
+      topicos = g.topicos.map(t=>String(t));
+    }
+    let revisaoCount = 0;
+    let msgs = g.messages || g.interacoes || g.items || [];
+    let interacoes = [];
+    let idxPerg = 1;
+    for(let k=0; k<msgs.length; k++) {
+      if (msgs[k].role === "user" && msgs[k+1] && msgs[k+1].role === "assistant" && hasScore(msgs[k+1])) {
+        let codNum = `${codigoAgrup}-${String(idxPerg).padStart(2,"0")}`;
+        interacoes.push({
+          codigo: codNum,
+          pergunta: msgs[k].content || "",
+          resposta: msgs[k+1].content || "",
+          revisao: (msgs[k].revisao || msgs[k+1].revisao) ? true : undefined,
+          data_horario: toBrazilTime(msgs[k].created_at || createdAt)
+        });
+        idxPerg++;
+        if (msgs[k+1].revisao) revisaoCount++;
+      }
+    }
+    if (interacoes.length === 0 && g.pergunta && g.resposta && hasScore(g)) {
+      let codNum = `${codigoAgrup}-01`;
+      interacoes.push({
+        codigo: codNum,
+        pergunta: g.pergunta,
+        resposta: g.resposta,
+        revisao: g.revisao ? true : undefined,
+        data_horario: toBrazilTime(g.data_horario || createdAt)
+      });
+      idxPerg = 2;
+      if (g.revisao) revisaoCount++;
+    }
+    totalMsgs += interacoes.length;
+    totalRevisadas += revisaoCount;
+    if (topicos.length) topicos.forEach(t => topicMap[t] = (topicMap[t]||0)+1);
+    if (interacoes.length) {
+      grupoMap[grupoId] = {
+        grupo: codigoAgrup,
+        group_id: grupoId,
+        data_horario: toBrazilTime(createdAt),
+        topicos: topicos,
+        interacoes: interacoes,
+        revisao: revisaoCount,
+        baixado: g.baixado
+      };
+      agrupamentos.push(grupoMap[grupoId]);
+      tempOutput.push(grupoMap[grupoId]);
+      if (topicos.length) allTops = allTops.concat(topicos);
+    }
+  }
+// === Renumeração sequencial de grupos e interações (sem buracos) ===
+// 1) Grupos GR01, GR02, ... na ordem que chegaram após filtros:
+agrupamentos.forEach((g, i) => {
+  const novoGrupo = `GR${String(i + 1).padStart(2, '0')}`;
+  const antigoGrupo = g.grupo;
+  if (novoGrupo !== antigoGrupo) {
+    g.grupo = novoGrupo;
+    // atualiza o prefixo do código nas interações
+    (g.interacoes || []).forEach(it => {
+      if (typeof it.codigo === "string") {
+        it.codigo = it.codigo.replace(/^[^-]+/, novoGrupo);
+      }
+    });
+  }
+});
+
+// 2) Interações dentro de cada grupo: -01, -02, -03... sem pular
+agrupamentos.forEach(g => {
+  (g.interacoes || []).forEach((it, idx) => {
+    const sufixo = String(idx + 1).padStart(2, '0');
+    // substitui o trecho após o hífen
+    if (typeof it.codigo === "string") {
+      it.codigo = `${g.grupo}-${sufixo}`;
+    }
+  });
+});
+// ===================================================================
+
+  $("estat-total-msgs").textContent = totalMsgs;
+  $("estat-total-grupos").textContent = agrupamentos.length;
+  $("estat-total-revisadas").textContent = totalRevisadas;
+  $("painel-estatisticas").style.display = "";
+  $("painel-filtros").style.display = "";
+  $("painel-exportacao").style.display = "";
+  $("topPanelRow").style.display = "grid";
+  $("mainGrid").style.display = "grid";
+  $("downloadBtn").style.display = "";
+  $("downloadZipBtn").style.display = "";
+  $("showUserSelectBtn").style.display = "";
+  $("downloadIdsBtn").style.display = "";
+
+  preencherFiltroTopicos(topicMap);
+  limparFiltros();
+  renderPreview();
+  renderCharts();
+
+  afterJsonLoad();
+  arquivoImportado = true;
+  
+  $("importarOutroContainer").style.display = "flex";
+  $("nomeArquivoImportado").textContent = "Arquivo importado: " + nomeArquivo;
+
+  if ($("container-inicial")) $("container-inicial").style.display = "none";
+  this.value = "";
+});
+$("importarOutroBtn").onclick = function() {
+  arquivoImportado = false;
+  resetUI();
+  $("container-inicial").style.display = "flex";
+  $("importarOutroContainer").style.display = "none";
+  nomeArquivo = "";
+};
+
+function resetUI() {
+  $("painel-estatisticas").style.display = "none";
+  $("painel-filtros").style.display = "none";
+  $("painel-exportacao").style.display = "none";
+  $("topPanelRow").style.display = "none";
+  $("mainGrid").style.display = "none";
+  $("downloadBtn").style.display = "none";
+  $("downloadZipBtn").style.display = "none";
+  $("showUserSelectBtn").style.display = "none";
+  $("downloadIdsBtn").style.display = "none";
+  $("result").innerHTML = '';
+  $("fileDateRange").textContent = "";
+  $("estat-data").style.display = "none";
+  $("fileName").textContent = "";
+  filtroGrupoSelecionado = "";
+  filtroTopicoSelecionado = "";
+  if(chartBarra) { chartBarra.destroy(); chartBarra = null; }
+  if(chartGrupo) { chartGrupo.destroy(); chartGrupo = null; }
+  if(chartTopicos) { chartTopicos.destroy(); chartTopicos = null; }
+  if(chartTopicosBarra) { chartTopicosBarra.destroy(); chartTopicosBarra = null; }
+  if (!arquivoImportado) {
+    if ($("container-inicial")) $("container-inicial").style.display = "flex";
+  }
+  if ($("importarOutroContainer")) $("importarOutroContainer").style.display = "none"; // <<--- ADICIONE AQUI
+}
+
+function toBrazilTime(dt) {
+  if (!dt) return "";
+  let d = new Date(dt);
+  if (isNaN(d.getTime())) return "";
+  d = new Date(d.getTime() - (d.getTimezoneOffset() * 60000) - (3 * 60 * 60 * 1000));
+  return `${d.toLocaleDateString('pt-BR')} ${d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})}`;
+}
+function highlight(str, term) {
+  if (!term) return str;
+  try {
+    const escTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return str.replace(new RegExp(`(${escTerm})`, 'gi'), `<mark>$1</mark>`);
+  } catch { return str; }
+}
+function hasScore(resp) {
+  if (!resp) return false;
+  if (typeof resp.score !== "undefined" && resp.score !== null) return true;
+  if (typeof resp.nota !== "undefined" && resp.nota !== null) return true;
+  return false;
+}
+function marcarTodasFiltradas(arr) {
+  const codigosFiltrados = arr.flatMap(grp => grp.interacoesFiltradas.map(it => it.codigo));
+  // Garante que só os códigos da lista filtrada sejam considerados
+  codigosFiltrados.forEach(cod => {
+    if (!interacoesMarcadas.includes(cod)) {
+      interacoesMarcadas.push(cod);
+    }
+  });
+  // Remove duplicados por segurança
+  interacoesMarcadas = [...new Set(interacoesMarcadas)];
+  renderPreview();
+}
+
+function desmarcarTodasFiltradas(arr) {
+  const codigosFiltrados = arr.flatMap(grp => grp.interacoesFiltradas.map(it => it.codigo));
+  interacoesMarcadas = interacoesMarcadas.filter(cod => !codigosFiltrados.includes(cod));
+  renderPreview();
+}
+
+function toggleMarcada(codigo) {
+  const idx = interacoesMarcadas.indexOf(codigo);
+  if (idx === -1) interacoesMarcadas.push(codigo);
+  else interacoesMarcadas.splice(idx, 1);
+  renderPreview();
+}
+
+function contadorMarcadas(arr) {
+  const codigosFiltrados = arr.flatMap(grp => grp.interacoesFiltradas.map(it => it.codigo));
+  // Garante que só conte códigos únicos da filtragem atual
+  const unicos = [...new Set(codigosFiltrados)];
+  return unicos.filter(cod => interacoesMarcadas.includes(cod)).length;
+}
+
+function preencherFiltroTopicos(topicMap) {
+  const sel = $("filtroTopicos");
+  sel.innerHTML = `<option value="">Todos</option>`;
+  Object.keys(topicMap).sort().forEach(top => {
+    let opt = document.createElement("option");
+    opt.value = top;
+    opt.textContent = top;
+    sel.appendChild(opt);
+  });
+}
+function limparFiltros() {
+  $("filtroPergunta").value = "";
+  $("filtroResposta").value = "";
+  $("filtroTopicos").selectedIndex = 0;
+  filtroGrupoSelecionado = "";
+  filtroTopicoSelecionado = "";
+  renderPreview();
+  $("filtroPergunta").focus();
+}
+$("limparFiltrosBtn").onclick = limparFiltros;
+$("filtroPergunta").addEventListener("input", renderPreview);
+$("filtroResposta").addEventListener("input", renderPreview);
+$("filtroTopicos").addEventListener("change", function() {
+  filtroTopicoSelecionado = this.value;
+  renderPreview();
+});
+
+function renderPreview() {
+  let termoPergunta = $("filtroPergunta").value.trim().toLowerCase();
+  let termoResposta = $("filtroResposta").value.trim().toLowerCase();
+  let topicoSel = $("filtroTopicos").value;
+  let cardsFiltrados = [];
+  perguntasFiltradas = [];
+  respostasFiltradas = [];
+  ambosFiltrados = [];
+  let qtdTotal = 0;
+
+  agrupamentos.forEach(grp => {
+    if (filtroGrupoSelecionado && filtroGrupoSelecionado !== grp.grupo) return;
+    if (filtroTopicoSelecionado && !(grp.topicos || []).includes(filtroTopicoSelecionado)) return;
+    let interacoesFiltradas = grp.interacoes.filter(it => {
+      let okPerg = !termoPergunta || (it.pergunta||"").toLowerCase().includes(termoPergunta);
+      let okResp = !termoResposta || (it.resposta||"").toLowerCase().includes(termoResposta);
+      let okTop = !topicoSel || (grp.topicos||[]).map(t=>String(t)).includes(String(topicoSel));
+      return okPerg && okResp && okTop;
+    });
+    if (interacoesFiltradas.length) {
+      cardsFiltrados.push({ ...grp, interacoesFiltradas });
+      for(let it of interacoesFiltradas) {
+        perguntasFiltradas.push({ codigo: it.codigo, pergunta: it.pergunta });
+        respostasFiltradas.push({ codigo: it.codigo, resposta: it.resposta });
+        ambosFiltrados.push({ codigo: it.codigo, pergunta: it.pergunta, resposta: it.resposta });
+        qtdTotal++;
+      }
+    }
+  });
+  $("qtdFiltro").textContent = qtdTotal;
+  $("downloadPerguntasBtn").style.display = perguntasFiltradas.length ? "" : "none";
+  $("downloadRespostasBtn").style.display = respostasFiltradas.length ? "" : "none";
+  $("downloadAmbosBtn").style.display = ambosFiltrados.length ? "" : "none";
+  renderCardsAgrup(cardsFiltrados);
+  atualizarContadorMarcadasNaTela();
+}
+
+// PREVIEW: tags refinadas, PERGUNTA e RESPOSTA sempre em linhas separadas, resposta com parágrafos preservados
+function renderCardsAgrup(arr) {
+  // Novo: container de controles
+  let htmlControles = `
+    <div class="marcacao-controls">
+      <button type="button" id="marcarTodosInteracoesBtn">Marcar Todos</button>
+      <button type="button" id="desmarcarTodosInteracoesBtn">Desmarcar Todos</button>
+      <span class="contador-marcadas-global" title="Total geral, independente do filtro">
+        <b>${new Set(interacoesMarcadas).size}</b> marcadas no total
+      </span>
+    </div>
+  `;
+
+  if (!arr.length) {
+    $("result").innerHTML = htmlControles + `<div style="color:#7cd6ff;opacity:0.9;margin-top:22px;text-align:center;font-size:1.13em;">Nenhum resultado encontrado.</div>`;
+    return;
+  }
+
+  $("result").innerHTML = htmlControles + arr.map(grp => `
+    <div class="card-group">
+      <div class="card-header">
+        <span class="group-id" title="Código do agrupamento">${grp.grupo}</span>
+        <span class="group-ref" title="ID">${grp.group_id}</span>
+        ${grp.data_horario ? `<span class="group-date">${grp.data_horario}</span>` : ""}
+        <span class="qtd-interacoes" title="Qtd. de interações"> ${grp.interacoesFiltradas.length} ${grp.interacoesFiltradas.length === 1 ? 'interação' : 'interações'}</span>
+        ${grp.baixado ? `<span class="badge-baixado">Baixado</span>` : ""}
+        ${grp.revisao ? `<span class="badge-baixado" style="background:#3be2b3;color:#132e23;margin-left:3px;">Revisada</span>` : ""}
+        <div class="topicos-tags">
+          ${(grp.topicos||[]).map((t, i) =>
+            `<span class="tag-topico">${t}</span>`
+          ).join('')}
+        </div>
+      </div>
+      <div class="card-interacoes">
+        ${grp.interacoesFiltradas.map((it, idx) => {
+          const marcada = interacoesMarcadas.includes(it.codigo);
+          return `
+<div class="card-interacao${marcada ? ' marcada-interacao' : ''}">
+  ${marcada ? `<div class="tag-marcada-topo">MARCADA</div>` : ""}
+  <div class="codigo-agrup">Código: <b>${it.codigo}</b></div>
+  <div>
+    <span class="pergunta-label">Pergunta:</span>
+    <span class="question">${highlight(it.pergunta, $("filtroPergunta").value.trim())}</span>
+  </div>
+  <div style="margin-top:6px; display:flex; align-items: center; justify-content: space-between;">
+    <div>
+      <span class="resposta-label">Resposta:</span>
+      <span class="answer">${highlight(it.resposta, $("filtroResposta").value.trim()).replace(/\n/g, "<br>")}</span>
+      ${it.revisao ? `<span class="badge-baixado" style="background:#3be2b3;color:#132e23;margin-left:10px;">Revisada</span>` : ""}
+    </div>
+    <label class="ck-marcacao-label" style="margin-left:20px;">
+      <input type="checkbox" class="ck-marcacao" data-codigo="${it.codigo}" ${marcada ? 'checked' : ''}>
+      <span>Marcar</span>
+    </label>
+  </div>
+</div>
+          `
+        }).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  // Ativa os botões e checkboxes após renderizar
+setTimeout(() => {
+  $("marcarTodosInteracoesBtn")?.addEventListener("click", () => marcarTodasFiltradas(arr));
+  $("desmarcarTodosInteracoesBtn")?.addEventListener("click", () => desmarcarTodasFiltradas(arr));
+
+  document.querySelectorAll(".ck-marcacao").forEach(cb => {
+    cb.addEventListener("change", function () {
+      const codigo = this.getAttribute("data-codigo");
+      const marcadaAgora = this.checked;
+
+      // Atualiza memória sem re-render
+      const idx = interacoesMarcadas.indexOf(codigo);
+      if (marcadaAgora && idx === -1) interacoesMarcadas.push(codigo);
+      if (!marcadaAgora && idx !== -1) interacoesMarcadas.splice(idx, 1);
+
+      // Ajusta visual só do card atual
+      const card = this.closest(".card-interacao");
+      if (card) {
+        card.classList.toggle("marcada-interacao", marcadaAgora);
+        let tag = card.querySelector(".tag-marcada-topo");
+        if (marcadaAgora && !tag) {
+          card.insertAdjacentHTML("afterbegin", `<div class="tag-marcada-topo">MARCADA</div>`);
+        } else if (!marcadaAgora && tag) {
+          tag.remove();
+        }
+      }
+
+      // Atualiza apenas o contador GLOBAL, se existir
+      const elg = document.querySelector(".contador-marcadas-global b");
+      if (elg) elg.textContent = new Set(interacoesMarcadas).size;
+    });
+  });
+}, 0);
+}
+// Exportação dos filtros
+$("downloadPerguntasBtn").onclick = () => {
+  if (!perguntasFiltradas.length) return alert("Nenhuma pergunta filtrada.");
+  downloadJSON(perguntasFiltradas, "perguntas_filtradas.json");
+};
+$("downloadRespostasBtn").onclick = () => {
+  if (!respostasFiltradas.length) return alert("Nenhuma resposta filtrada.");
+  downloadJSON(respostasFiltradas, "respostas_filtradas.json");
+};
+$("downloadAmbosBtn").onclick = () => {
+  if (!ambosFiltrados.length) return alert("Nenhuma pergunta+resposta filtrada.");
+  downloadJSON(ambosFiltrados, "perguntas_respostas_filtradas.json");
+};
+function downloadJSON(obj, filename) {
+  const str = JSON.stringify(obj, null, 2);
+  const blob = new Blob([str], {type:"application/json"});
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  link.click();
+}
+
+// Exportação dos cards
+$("downloadBtn").onclick = () => {
+  if(!agrupamentos.length) return alert("Nada para exportar.");
+  let outputData = agrupamentos.map(g=>{
+    return {
+      grupo: g.grupo,
+      group_id: g.group_id,
+      interacoes: g.interacoes.map(it=>({
+        codigo: it.codigo,
+        pergunta: it.pergunta,
+        resposta: it.resposta,
+        ...(it.revisao ? { revisao: true } : {})
+      }))
+    }
+  });
+  const blob = new Blob([JSON.stringify(outputData, null, 2)], {type:"application/json"});
+  let link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "interacoes_completo.json";
+  link.click();
+};
+$("downloadZipBtn").onclick = async () => {
+  if (!agrupamentos.length) return alert("Nada para exportar.");
+
+  // monta os blobs por grupo
+  const arquivos = agrupamentos.map(g => {
+    const obj = {
+      grupo: g.grupo,
+      group_id: g.group_id,
+      interacoes: (g.interacoes || []).map(it => ({
+        codigo: it.codigo,
+        pergunta: it.pergunta,
+        resposta: it.resposta,
+        ...(it.revisao ? { revisao: true } : {})
+      }))
+    };
+    const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
+    return { nome: `${g.grupo}.json`, blob };
+  });
+
+  // Tenta salvar na pasta escolhida (Chrome/Edge recentes, contexto seguro)
+  if ('showDirectoryPicker' in window) {
+    try {
+      const dir = await window.showDirectoryPicker();
+      for (const arq of arquivos) {
+        const handle = await dir.getFileHandle(arq.nome, { create: true });
+        const writable = await handle.createWritable();
+        await writable.write(arq.blob);
+        await writable.close();
+      }
+      alert("Arquivos salvos na pasta escolhida.");
+      return;
+    } catch (e) {
+      if (e && e.name === 'AbortError') return; // usuário cancelou
+      console.warn("Falha no salvamento por pasta, usando download individual.", e);
+      // cai no fallback abaixo
+    }
+  }
+
+  // Fallback: download individual (um .json por grupo)
+  arquivos.forEach((arq, idx) => {
+    setTimeout(() => {
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(arq.blob);
+      link.download = arq.nome;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }, idx * 120); // pequeno intervalo pra evitar bloqueio do navegador
+  });
+};
+$("showUserSelectBtn").onclick = () => abrirModalSelecionarGrupos();
+$("downloadIdsBtn").onclick = () => {
+  if(!idsBaixados.length) return alert("Nenhum ID baixado!");
+  const blob = new Blob([JSON.stringify(idsBaixados, null, 2)], {type:"application/json"});
+  let link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "ids_baixados.json";
+  link.click();
+};
+
+// Gráficos (pizza do mesmo tamanho)
+function renderCharts() {
+  // Gráfico barra de grupo
+  let labelsGrupo = agrupamentos.map(g => g.grupo);
+  let valsGrupo = agrupamentos.map(g => (g.interacoes||[]).length);
+
+  if(chartBarra) { chartBarra.destroy(); chartBarra = null; }
+  chartBarra = new Chart($("barChartGrupo"), {
+    type: "bar",
+    data: {
+      labels: labelsGrupo,
+      datasets: [{ label: "Interações por Grupo", data: valsGrupo, backgroundColor: "#2ee2f7", borderColor: "#1a65a6", borderWidth: 1 }]
+    },
+    options: {
+      responsive: true,
+      plugins: { 
+        legend: { display: false, labels: { color: '#ffffff' } },
+        title: { display: false, color: '#ffffff' }
+      },
+      scales: { 
+        x: { beginAtZero: true, ticks: { color: '#ffffff' } }, 
+        y: { beginAtZero: true, precision:0, ticks: { color: '#ffffff' } } 
+      },
+      onClick: function(evt, elements) {
+        if (elements.length > 0) {
+          let idx = elements[0].index;
+          filtroGrupoSelecionado = this.data.labels[idx];
+          filtroTopicoSelecionado = "";
+          renderPreview();
+        }
+      }
+    }
+  });
+
+  // Gráfico pizza de grupos por faixa
+  let faixaMap = { "1-2":0, "3-4":0, "5-6":0, "7+":0 };
+  agrupamentos.forEach(g=>{
+    let q = (g.interacoes||[]).length;
+    if(q<=2) faixaMap["1-2"]++;
+    else if(q<=4) faixaMap["3-4"]++;
+    else if(q<=6) faixaMap["5-6"]++;
+    else faixaMap["7+"]++;
+  });
+  if(chartGrupo) { chartGrupo.destroy(); chartGrupo = null; }
+  chartGrupo = new Chart($("pieChartGrupo"), {
+    type: "pie",
+    data: {
+      labels: Object.keys(faixaMap),
+      datasets: [{ label: "Faixas por Grupo", data: Object.values(faixaMap), borderWidth: 1 }]
+    },
+    options: {
+      responsive: true,
+      plugins: { 
+        legend: { display: true, position: 'bottom', labels: { color: '#ffffff' } },
+        title: { display: false, color: '#ffffff' }
+      }
+    }
+  });
+
+  // Gráfico barra de tópicos
+  let topicosCont = {};
+  agrupamentos.forEach(g=> (g.topicos||[]).forEach(t=>topicosCont[t]=(topicosCont[t]||0)+(g.interacoes?.length||0)));
+  let labelsTop = Object.keys(topicosCont);
+  let valsTop = Object.values(topicosCont);
+
+  if(chartTopicosBarra) { chartTopicosBarra.destroy(); chartTopicosBarra = null; }
+  chartTopicosBarra = new Chart($("barChartTopicos"), {
+    type: "bar",
+    data: {
+      labels: labelsTop,
+      datasets: [{ label: "Interações por Tópico", data: valsTop, backgroundColor: "#47e7b8", borderColor: "#1a65a6", borderWidth: 1 }]
+    },
+    options: {
+      responsive: true,
+      plugins: { 
+        legend: { display: false, labels: { color: '#ffffff' } },
+        title: { display: false, color: '#ffffff' }
+      },
+      scales: { 
+        x: { beginAtZero: true, ticks: { color: '#ffffff' } }, 
+        y: { beginAtZero: true, precision:0, ticks: { color: '#ffffff' } } 
+      },
+      onClick: function(evt, elements) {
+        if (elements.length > 0) {
+          let idx = elements[0].index;
+          filtroTopicoSelecionado = this.data.labels[idx];
+          filtroGrupoSelecionado = "";
+          $("filtroTopicos").value = filtroTopicoSelecionado;
+          renderPreview();
+        }
+      }
+    }
+  });
+
+  // Gráfico pizza de tópicos (tamanho idêntico ao anterior)
+  if(chartTopicos) { chartTopicos.destroy(); chartTopicos = null; }
+  chartTopicos = new Chart($("pieChartTopicos"), {
+    type: "pie",
+    data: {
+      labels: labelsTop,
+      datasets: [{ label: "Por Tópico", data: valsTop, borderWidth: 1 }]
+    },
+    options: {
+      responsive: true,
+      plugins: { 
+        legend: { display: true, position: 'bottom', labels: { color: '#ffffff' } },
+        title: { display: false, color: '#ffffff' }
+      }
+    }
+  });
+}
+
+// Alternância de gráfico/tab
+$("btnGrupo").onclick = () => {
+  $("chartsPorGrupo").style.display = "";
+  $("chartsPorTopico").style.display = "none";
+  $("btnGrupo").classList.add("selected");
+  $("btnTopicos").classList.remove("selected");
+  filtroGrupoSelecionado = "";
+  filtroTopicoSelecionado = "";
+  renderPreview();
+};
+$("btnTopicos").onclick = () => {
+  $("chartsPorGrupo").style.display = "none";
+  $("chartsPorTopico").style.display = "";
+  $("btnGrupo").classList.remove("selected");
+  $("btnTopicos").classList.add("selected");
+  filtroGrupoSelecionado = "";
+  filtroTopicoSelecionado = "";
+  renderPreview();
+};
+
+function afterJsonLoad() {
+  $("mensagem-inicial").style.display = "none";
+}
+
+// Botão de sugestão
+$("enviarSugestaoBtn").onclick = function() {
+  window.open('mailto:humberto.pereira@keevo.com.br?subject=Curadoria Pro%20-%20Sugestão&body=Olá, gostaria de enviar a seguinte sugestão:%0A', '_blank');
+};
+
+// Modal para exportação dos grupos selecionados
+function abrirModalSelecionarGrupos() {
+  let html = `
+    <div id="modalSelGrupos" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:10001;background:#172027e0;display:flex;align-items:center;justify-content:center;">
+      <div style="background:#263142;padding:22px 30px 14px 30px;border-radius:14px;min-width:305px;max-width:96vw;box-shadow:0 10px 28px #0017;">
+        <div style="font-size:1.13em;font-weight:700;color:#00c4fa;margin-bottom:10px;">
+          Selecione agrupamentos para exportar:
+        </div>
+        <div style="margin-bottom:11px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <label for="intervaloInicio" style="color:#99c5e1;">Início:</label>
+          <input id="intervaloInicio" type="number" min="1" placeholder="1" style="width:65px;border-radius:7px;border:1px solid #3698c3;padding:5px 8px;font-size:.97em;">
+          <label for="intervaloFim" style="color:#99c5e1;">Fim:</label>
+          <input id="intervaloFim" type="number" min="1" placeholder="${agrupamentos.length}" style="width:65px;border-radius:7px;border:1px solid #3698c3;padding:5px 8px;font-size:.97em;">
+          <button id="marcarTodosBtn" style="padding:4px 14px;border-radius:7px;background:#15b8d6;color:#fff;border:none;font-weight:600;">Marcar Todos</button>
+          <button id="desmarcarTodosBtn" style="padding:4px 14px;border-radius:7px;background:#ff6464;color:#fff;border:none;font-weight:600;">Desmarcar Todos</button>
+        </div>
+        <div style="max-height:36vh;overflow-y:auto;margin-bottom:13px;" id="listaCheckboxes">
+          ${agrupamentos.map((g,i)=>`
+            <label style="display:flex;align-items:center;gap:7px;margin-bottom:5px;">
+              <input type="checkbox" class="ckgrupo" value="${g.group_id}" ${ultimaSelecaoGrupos.includes(g.group_id)?"checked":""}/>
+              <span style="color:#fff">${g.grupo}</span>
+            </label>
+          `).join('')}
+        </div>
+        <div style="text-align:right;">
+          <button id="baixarSelecionadosBtn" style="padding:7px 16px;border-radius:8px;background:#23d685;color:#fff;border:none;font-weight:600;margin-right:7px;">Exportar</button>
+          <button id="fecharModalBtn" style="padding:7px 16px;border-radius:8px;background:#d65c5c;color:#fff;border:none;font-weight:600;">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  `;
+  $("groupDownloadContainer")?.remove?.();
+  let cont = document.createElement("div");
+  cont.id = "groupDownloadContainer";
+  cont.innerHTML = html;
+  document.body.appendChild(cont);
+  cont.addEventListener('click', e => {
+    if (e.target === cont) cont.remove();
+  });
+  document.getElementById("marcarTodosBtn").onclick = function() {
+    document.querySelectorAll(".ckgrupo").forEach(c=>c.checked=true);
+  };
+  document.getElementById("desmarcarTodosBtn").onclick = function() {
+    document.querySelectorAll(".ckgrupo").forEach(c=>c.checked=false);
+  };
+document.getElementById("baixarSelecionadosBtn").onclick = async function() {
+  const selecionados = Array.from(document.querySelectorAll(".ckgrupo:checked")).map(x => x.value);
+  ultimaSelecaoGrupos = selecionados;
+  if (!selecionados.length) return alert("Nenhum agrupamento selecionado!");
+
+  const arquivos = [];
+  selecionados.forEach(id => {
+    const g = agrupamentos.find(x => String(x.group_id) === String(id));
+    if (g) {
+      const obj = {
+        grupo: g.grupo,
+        group_id: g.group_id,
+        interacoes: (g.interacoes || []).map(it => ({
+          codigo: it.codigo,
+          pergunta: it.pergunta,
+          resposta: it.resposta,
+          ...(it.revisao ? { revisao: true } : {})
+        }))
+      };
+      arquivos.push({
+        nome: `${g.grupo}.json`,
+        blob: new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" })
+      });
+    }
+  });
+
+  // Tenta salvar numa pasta escolhida
+  if ('showDirectoryPicker' in window) {
+    try {
+      const dir = await window.showDirectoryPicker();
+      for (const arq of arquivos) {
+        const handle = await dir.getFileHandle(arq.nome, { create: true });
+        const writable = await handle.createWritable();
+        await writable.write(arq.blob);
+        await writable.close();
+      }
+      alert("Arquivos salvos na pasta escolhida.");
+      document.getElementById("groupDownloadContainer").remove();
+      return;
+    } catch (e) {
+      if (e && e.name === 'AbortError') return; // usuário cancelou
+      console.warn("Falha salvando por pasta, usando download individual.", e);
+      // cai no fallback abaixo
+    }
+  }
+
+  // Fallback: downloads individuais
+  arquivos.forEach((arq, idx) => {
+    setTimeout(() => {
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(arq.blob);
+      link.download = arq.nome;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }, idx * 120);
+  });
+
+  document.getElementById("groupDownloadContainer").remove();
+};
+  document.getElementById("fecharModalBtn").onclick = function() {
+    document.getElementById("groupDownloadContainer").remove();
+  };
+  document.getElementById("intervaloInicio").oninput = function() {
+    let ini = Number(this.value), fim = Number(document.getElementById("intervaloFim").value);
+    document.querySelectorAll(".ckgrupo").forEach((c,ix) => c.checked = ix+1>=ini && (!fim||ix+1<=fim));
+  };
+  document.getElementById("intervaloFim").oninput = function() {
+    let ini = Number(document.getElementById("intervaloInicio").value), fim = Number(this.value);
+    document.querySelectorAll(".ckgrupo").forEach((c,ix) => c.checked = (!ini||ix+1>=ini) && ix+1<=fim);
+  };
+}
+// Finalização do script e do HTML
+// Exporta relatório por tópicos
+document.getElementById("exportTopicosBtn").onclick = () => {
+  if (!agrupamentos.length) return alert("Nada para exportar.");
+  let topicosCont = {};
+  let totalInteracoes = 0;
+
+  agrupamentos.forEach(g => {
+    (g.topicos || []).forEach(t => {
+      topicosCont[t] = (topicosCont[t] || 0) + (g.interacoes?.length || 0);
+      totalInteracoes += (g.interacoes?.length || 0);
+    });
+  });
+
+  // Cabeçalho com ; e BOM pro Excel pt-BR
+  let csv = "TÓPICO;QUANTIDADE;PERCENTUAL\n";
+  Object.entries(topicosCont).forEach(([topico, qtd]) => {
+    const percentual = ((qtd / totalInteracoes) * 100).toFixed(2).replace(".", ",") + "%";
+    csv += `"${String(topico).replace(/"/g,'""')}";${qtd};"${percentual}"\n`;
+  });
+
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "relatorio_topicos.csv";
+  link.click();
+};
+
+// Exporta somente as interações marcadas
+document.getElementById("exportMarcadasBtn").onclick = () => {
+    if (!interacoesMarcadas.length) return alert("Nenhuma interação marcada.");
+    let marcadas = [];
+    agrupamentos.forEach(g => {
+        g.interacoes.forEach(it => {
+            if (interacoesMarcadas.includes(it.codigo)) {
+                marcadas.push([it.codigo, it.pergunta, it.resposta]);
+            }
+        });
+    });
+    let csv = "CÓDIGO,PERGUNTA,RESPOSTA\n";
+    marcadas.forEach(([codigo, pergunta, resposta]) => {
+        csv += `"${codigo}","${(pergunta||"").replace(/"/g,'""')}","${(resposta||"").replace(/"/g,'""')}"\n`;
+    });
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "interacoes_marcadas.csv";
+    link.click();
+};
+</script>
+<script>
+/* ============== CHATBASE: ENVIO EM LOTES (≤ 8000) — MESMA CONVERSA POR GRUPO ==============
+ * O que esta versão faz:
+ * - Usa sempre o MESMO conversationId por grupo (gerado e salvo por group_id).
+ * - Divide cada grupo em QUANTOS LOTES forem necessários (≤ 8000 caracteres POR LOTE).
+ * - Cada lote começa SEMPRE em uma interação completa (pergunta + resposta).
+ * - NUNCA quebra palavras entre lotes; se uma única interação já exceder o limite, corta a RESPOSTA desta
+ *   interação com segurança de palavra (no final de uma palavra).
+ * - A cada lote enviado, reenvia o histórico COMPLETO da conversa (transcript) + o novo lote, e salva o transcript.
+ * - Mostra barra de progresso que considera o total de lotes de todos os grupos selecionados.
+ * - Mantém a tela e os IDs de elementos (botões, inputs) que você já tem no modal grande.
+ * =========================================================================================== */
+
+const CHATBASE_DEFAULTS = {
+  API_KEY: "",      // (opcional) API key padrão
+  CHATBOT_ID: "",   // (opcional) Chatbot ID padrão
+  PROXY_URL: ""     // (opcional) Proxy seguro (recomendado em produção)
+};
+const CB_STORAGE_KEYS   = { API_KEY:'chatbase_api_key', CHATBOT_ID:'chatbase_chatbot_id', PROXY_URL:'chatbase_proxy_url' };
+const CB_CONV_MAP_KEY   = 'chatbase_conv_map_v1';     // group_id -> nosso conversationId (UUID)
+const CB_TRANSCRIPTS_KEY= 'chatbase_transcripts_v1';  // conversationId -> messages[] (histórico)
+
+const $CB = (id) => document.getElementById(id);
+
+// ---------- Storage helpers ----------
+function cbGetSetting(key) {
+  try { const v = localStorage.getItem(key); if (v && v !== 'null' && v !== 'undefined') return v; } catch {}
+  if (key === CB_STORAGE_KEYS.API_KEY) return CHATBASE_DEFAULTS.API_KEY;
+  if (key === CB_STORAGE_KEYS.CHATBOT_ID) return CHATBASE_DEFAULTS.CHATBOT_ID;
+  if (key === CB_STORAGE_KEYS.PROXY_URL) return CHATBASE_DEFAULTS.PROXY_URL;
+  return "";
+}
+function cbSetSetting(key, value) { try { localStorage.setItem(key, value || ""); } catch {} }
+function cbClearSettings() { try { Object.values(CB_STORAGE_KEYS).forEach(k => localStorage.removeItem(k)); } catch {} }
+
+function loadConvMap() { try { return JSON.parse(localStorage.getItem(CB_CONV_MAP_KEY) || "{}"); } catch { return {}; } }
+function saveConvMap(map){ try { localStorage.setItem(CB_CONV_MAP_KEY, JSON.stringify(map)); } catch {} }
+function loadTranscripts(){ try { return JSON.parse(localStorage.getItem(CB_TRANSCRIPTS_KEY) || "{}"); } catch { return {}; } }
+function saveTranscripts(o){ try { localStorage.setItem(CB_TRANSCRIPTS_KEY, JSON.stringify(o)); } catch {} }
+
+function genUUID() { return (crypto?.randomUUID?.() || ('cb-' + Math.random().toString(36).slice(2) + Date.now().toString(36))); }
+
+// conversationId próprio por grupo (chave = group_id estável; valor = UUID nosso)
+function getOrCreateConvIdForGroup(g) {
+  const map = loadConvMap();
+  const key = String(g.group_id || g.grupo || 'sem-id');
+  if (!map[key]) { map[key] = genUUID(); saveConvMap(map); }
+  return map[key];
+}
+
+// Transcript helpers
+function getTranscript(convId) { const all = loadTranscripts(); return Array.isArray(all[convId]) ? all[convId] : []; }
+function setTranscript(convId, messages) { const all = loadTranscripts(); all[convId] = messages; saveTranscripts(all); }
+
+// ---------- Montagem do JSON no FORMATO EXATO ----------
+function buildGroupObject(g, interacoesArr) {
+  return {
+    grupo: g.grupo,
+    group_id: g.group_id,
+    interacoes: interacoesArr.map(it => ({
+      codigo: it.codigo,
+      pergunta: it.pergunta || '',
+      resposta: it.resposta || ''
+    }))
+  };
+}
+
+// ---------- Corte seguro no fim de palavra ----------
+function cutAtWordBoundary(str, maxLen) {
+  if (str.length <= maxLen) return str;
+  // procura o último espaço antes de maxLen
+  const sub = str.slice(0, maxLen);
+  const idx = sub.lastIndexOf(' ');
+  if (idx > 0) return sub.slice(0, idx).trim();
+  // sem espaços? corta seco
+  return sub;
+}
+
+// ---------- Ajusta uma única interação para caber no limite (corta a RESPOSTA, fim de palavra) ----------
+function fitSingleInteraction(g, it, limit) {
+  // primeiro tenta com a resposta inteira
+  let obj = buildGroupObject(g, [it]);
+  let pretty = JSON.stringify(obj, null, 2);
+  if (pretty.length <= limit) return obj;
+
+  // binário na RESPOSTA, cortando em fim de palavra
+  const resp = (it.resposta || '');
+  let lo = 0, hi = resp.length, best = '';
+  while (lo <= hi) {
+    const mid = Math.floor((lo + hi) / 2);
+    const cut = cutAtWordBoundary(resp, mid);
+    const test = buildGroupObject(g, [{...it, resposta: cut}]);
+    const s = JSON.stringify(test, null, 2);
+    if (s.length <= limit) { best = cut; lo = mid + 1; } else { hi = mid - 1; }
+  }
+  return buildGroupObject(g, [{...it, resposta: best}]);
+}
+
+// ---------- Divide um grupo em N lotes (cada lote ≤ limit), sem quebrar interações ----------
+function buildBatchesForGroup(g, inters, limit = 8000) {
+  const batches = [];
+  let i = 0;
+  while (i < inters.length) {
+    // tenta encher um lote com interações INTEIRAS
+    let j = i;
+    let lastGood = i - 1;
+    while (j < inters.length) {
+      const test = buildGroupObject(g, inters.slice(i, j + 1));
+      const s = JSON.stringify(test, null, 2);
+      if (s.length <= limit) { lastGood = j; j++; }
+      else break;
+    }
+
+    if (lastGood >= i) {
+      // temos pelo menos 1 interação inteira que coube
+      batches.push(buildGroupObject(g, inters.slice(i, lastGood + 1)));
+      i = lastGood + 1;
+    } else {
+      // nem a primeira coube inteira: corta SOMENTE a RESPOSTA desta primeira
+      batches.push(fitSingleInteraction(g, inters[i], limit));
+      i = i + 1;
+    }
+  }
+  return batches;
+}
+
+// ---------- Monta messages = histórico + novo LOTE ----------
+function prepareMessages(convId, payloadObj) {
+  const prev = getTranscript(convId);
+  const novo = { role: 'user', content: JSON.stringify(payloadObj, null, 2) };
+  return [...prev, novo];
+}
+
+// ---------- Envia para Chatbase (direto ou via proxy) ----------
+async function sendToChatbase({ chatbotId, apiKey, proxyUrl, conversationId, messages }) {
+  const useProxy = !!proxyUrl;
+  const url = useProxy ? proxyUrl : 'https://www.chatbase.co/api/v1/chat';
+  const headers = { 'Content-Type': 'application/json' };
+  if (!useProxy) headers['Authorization'] = `Bearer ${apiKey}`;
+  const body = JSON.stringify({ chatbotId, conversationId, messages });
+  const resp = await fetch(url, { method: 'POST', headers, body });
+  let data = {};
+  try { data = await resp.json(); } catch {}
+  return { ok: resp.ok, status: resp.status, data };
+}
+
+// --------- Monta lista de grupos no modal (usa os IDs já existentes) ---------
+function cbBuildGroupList() {
+  const listEl = $CB('cbGroupList'); if (!listEl) return;
+  listEl.innerHTML = '';
+
+  const groups = Array.isArray(agrupamentos) ? agrupamentos : [];
+  groups.forEach(g => {
+    const total = (g.interacoes || []).length;
+    const conv  = getOrCreateConvIdForGroup(g);
+
+    const item = document.createElement('label');
+    item.style.cssText = "display:flex;align-items:center;gap:8px;background:#1d2a39;border:1px solid #223a52;border-radius:10px;padding:8px 10px;";
+
+    const chk = document.createElement('input');
+    chk.type = 'checkbox';
+    chk.name = 'cbGroupChk';
+    chk.value = g.grupo;                // exibe o código do grupo
+    chk.setAttribute('data-conv', conv); // conversationId persistido
+
+    const span = document.createElement('span');
+    span.innerHTML = `<b>${g.grupo}</b> <small style="opacity:.85;">(${total} interações)</small><br><small style="opacity:.7;">ID: ${g.group_id}</small>`;
+
+    item.appendChild(chk);
+    item.appendChild(span);
+    listEl.appendChild(item);
+  });
+}
+function markAllGroups(mark=true) {
+  document.querySelectorAll('input[name="cbGroupChk"]').forEach(el => { el.checked = mark; });
+}
+
+// --------- Abrir/fechar modal e salvar configs ---------
+$CB('chatbasePanelBtn')?.addEventListener('click', () => {
+  $CB('chatbaseModal').style.display = 'block';
+  $CB('cbChatbotId').value = cbGetSetting(CB_STORAGE_KEYS.CHATBOT_ID) || "";
+  $CB('cbApiKey').value    = cbGetSetting(CB_STORAGE_KEYS.API_KEY)    || "";
+  $CB('cbProxyUrl').value  = cbGetSetting(CB_STORAGE_KEYS.PROXY_URL)  || "";
+  $CB('cbProgress').value = 0; 
+  $CB('cbProgressText').textContent = 'Aguardando…'; 
+  $CB('cbResults').innerHTML = '';
+  cbBuildGroupList();
+});
+$CB('chatbaseCloseBtn')?.addEventListener('click', () => { $CB('chatbaseModal').style.display = 'none'; });
+$CB('cbSaveBtn')?.addEventListener('click', () => {
+  if ($CB('cbRemember')?.checked) {
+    cbSetSetting(CB_STORAGE_KEYS.CHATBOT_ID, $CB('cbChatbotId').value.trim());
+    cbSetSetting(CB_STORAGE_KEYS.API_KEY,    $CB('cbApiKey').value.trim());
+    cbSetSetting(CB_STORAGE_KEYS.PROXY_URL,  $CB('cbProxyUrl').value.trim());
+  }
+  alert('Configurações salvas neste navegador.');
+});
+$CB('cbClearBtn')?.addEventListener('click', () => {
+  cbClearSettings();
+  $CB('cbChatbotId').value = $CB('cbApiKey').value = $CB('cbProxyUrl').value = "";
+});
+$CB('cbMarkAllGroupsBtn')?.addEventListener('click', () => markAllGroups(true));
+$CB('cbUnmarkAllGroupsBtn')?.addEventListener('click', () => markAllGroups(false));
+
+// --------- Envio por GRUPOS SELECIONADOS (em LOTES) ---------
+$CB('cbSendSelectedGroupsBtn')?.addEventListener('click', async () => {
+  const chatbotId = $CB('cbChatbotId').value.trim() || cbGetSetting(CB_STORAGE_KEYS.CHATBOT_ID);
+  const apiKey    = $CB('cbApiKey').value.trim()    || cbGetSetting(CB_STORAGE_KEYS.API_KEY);
+  const proxyUrl  = $CB('cbProxyUrl').value.trim()  || cbGetSetting(CB_STORAGE_KEYS.PROXY_URL);
+  const resultsEl = $CB('cbResults'), bar = $CB('cbProgress'), barTxt = $CB('cbProgressText');
+
+  resultsEl.innerHTML = '';
+  if (!chatbotId) { resultsEl.textContent = 'Preencha o Chatbot ID.'; return; }
+  if (!proxyUrl && !apiKey) { resultsEl.textContent = 'Sem Proxy: preencha a API Key.'; return; }
+
+  const sel = Array.from(document.querySelectorAll('input[name="cbGroupChk"]:checked'));
+  if (!sel.length) { resultsEl.textContent = 'Selecione pelo menos um grupo.'; return; }
+
+  // Intervalo De/Até (1-based)
+  const rangeStart = parseInt(($CB('cbRangeStart').value || '').trim(), 10);
+  const rangeEnd   = parseInt(($CB('cbRangeEnd').value || '').trim(), 10);
+
+  const groups = Array.isArray(agrupamentos) ? agrupamentos : [];
+
+  // --------- PRÉ-CÁLCULO DOS LOTES (para a barra de progresso) ---------
+  const plans = []; // { g, convId, batches: [payloadObj, ...] }
+  for (const chk of sel) {
+    const g = groups.find(x => x.grupo === chk.value);
+    if (!g) { resultsEl.innerHTML += `<div>⚠️ ${chk.value}: grupo não encontrado.</div>`; continue; }
+    const convId = getOrCreateConvIdForGroup(g);
+
+    // aplica intervalo
+    let inters = (g.interacoes || []);
+    const startIdx = isNaN(rangeStart) ? 1 : Math.max(1, rangeStart);
+    const endIdx   = isNaN(rangeEnd)   ? inters.length : Math.min(inters.length, rangeEnd);
+    if (startIdx <= endIdx) inters = inters.slice(startIdx - 1, endIdx);
+    else inters = [];
+
+    if (!inters.length) {
+      plans.push({ g, convId, batches: [] });
+      continue;
+    }
+
+    const batches = buildBatchesForGroup(g, inters, 8000);
+    plans.push({ g, convId, batches });
+  }
+
+  const totalBatches = plans.reduce((acc,p)=> acc + p.batches.length, 0) || 1;
+  let sent = 0;
+
+  // --------- ENVIO (lote a lote), sempre MESMO conversationId ---------
+  const btn = $CB('cbSendSelectedGroupsBtn'); const prevLabel = btn.textContent; btn.disabled = true; btn.textContent = 'Enviando...';
+
+  for (const plan of plans) {
+    const { g, convId, batches } = plan;
+
+    if (!batches.length) {
+      resultsEl.innerHTML += `<div>⚠️ <b>${g.grupo}</b> (${convId}) → nenhuma interação no intervalo selecionado.</div>`;
+      continue;
+    }
+
+    for (let i = 0; i < batches.length; i++) {
+      const payload = batches[i];
+      // Prepara histórico + novo lote
+      const messages = prepareMessages(convId, payload);
+
+      try {
+        barTxt.textContent = `Enviando ${sent+1}/${totalBatches} • ${g.grupo} (lote ${i+1}/${batches.length})`;
+        const { ok, status, data } = await sendToChatbase({ chatbotId, apiKey, proxyUrl, conversationId: convId, messages });
+        const texto = (data && (data.text || data.reply || data.response || JSON.stringify(data).slice(0,300))) || '';
+        resultsEl.innerHTML += `<div>${ok ? '✅' : '❌'} <b>${g.grupo}</b> (${convId}) • lote ${i+1}/${batches.length} → ${ok ? (texto || 'OK') : ('HTTP '+status+' '+(data.error || 'Falha'))}</div>`;
+        if (ok) setTranscript(convId, messages); // salva histórico atualizado
+      } catch (e) {
+        resultsEl.innerHTML += `<div>❌ <b>${g.grupo}</b> (${convId}) • lote ${i+1}/${batches.length} → ${e.message || e}</div>`;
+      }
+
+      sent++;
+      bar.value = Math.round(sent * 100 / totalBatches);
+    }
+  }
+
+  barTxt.textContent = `Concluído ${sent}/${totalBatches}`;
+  btn.disabled = false; btn.textContent = prevLabel;
+});
+/* ======================= FIM — CHATBASE (LOTES ≤ 8000) ======================= */
+</script>
+</body>
+</html>
