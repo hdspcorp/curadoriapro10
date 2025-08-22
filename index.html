@@ -1234,8 +1234,8 @@
 </head>
 <body>
   <header>
-    <h1 class="kiara-title">Curadoria Pro - Kiara</h1>
-    <div class="assinatura-hdsp">HDSP Corp. Ver. 5.5</div>
+    <h1 class="kiara-title">Curadoria - Pré</h1>
+    <div class="assinatura-hdsp">HDSP Corp. Ver. 5.6</div>
   </header>
   <div id="container-inicial" class="container-centralizado-inicial">
     <div class="upload-section" id="uploadSection">
@@ -1244,7 +1244,7 @@
       <span class="file-name" id="fileName"></span>
     </div>
     <div id="mensagem-inicial" class="msg-inicial">
-      Importe um arquivo JSON para visualizar, filtrar e exportar suas interações agrupadas.
+      Importe um arquivo JSON
     </div>
   </div>
   <div class="top-panel-row" id="topPanelRow" style="display:none;">
@@ -2515,39 +2515,109 @@ $CB('cbSendSelectedGroupsBtn')?.addEventListener('click', async () => {
   const totalBatches = plans.reduce((acc,p)=> acc + p.batches.length, 0) || 1;
   let sent = 0;
 
-  // --------- ENVIO (lote a lote), sempre MESMO conversationId ---------
-  const btn = $CB('cbSendSelectedGroupsBtn'); const prevLabel = btn.textContent; btn.disabled = true; btn.textContent = 'Enviando...';
+// --------- ENVIO + REENVIO (até 3 tentativas por grupo) ---------
+const btn = $CB('cbSendSelectedGroupsBtn');
+const prevLabel = btn.textContent;
+btn.disabled = true;
+btn.textContent = 'Enviando.';
 
-  for (const plan of plans) {
+// Mapa de falhas por grupo (conta quantas passagens falharam)
+const failCounts = new Map(); // grupo -> tentativas com falha
+
+let attempt = 1;
+let currentPlans = plans; // 1ª passada: todos os selecionados
+
+while (attempt <= 3 && currentPlans.length) {
+  const passLabel = (attempt === 1) ? 'Envio' : `Reenvio ${attempt - 1}`;
+
+  // Barra de progresso é por passada (fica mais claro e não estoura 100%)
+  const totalBatchesThisPass = currentPlans.reduce((acc, p) => acc + p.batches.length, 0) || 1;
+  let sentThisPass = 0;
+  bar.value = 0;
+  barTxt.textContent = `${passLabel} iniciado…`;
+
+  // Cabeçalho visual nos resultados
+  $CB('cbResults').innerHTML += `<div style="margin:6px 0;color:#9fb3c8;">— ${passLabel} • ${new Date().toLocaleTimeString()} —</div>`;
+
+  for (const plan of currentPlans) {
     const { g, convId, batches } = plan;
+    const grp = g.grupo;
 
     if (!batches.length) {
-      resultsEl.innerHTML += `<div>⚠️ <b>${g.grupo}</b> (${convId}) → nenhuma interação no intervalo selecionado.</div>`;
+      resultsEl.innerHTML += `<div>⚠️ <b>${grp}</b> (${convId}) → nenhuma interação no intervalo selecionado.</div>`;
       continue;
     }
 
+    let groupHadFailure = false;
+
     for (let i = 0; i < batches.length; i++) {
       const payload = batches[i];
-      // Prepara histórico + novo lote
       const messages = prepareMessages(convId, payload);
 
       try {
-        barTxt.textContent = `Enviando ${sent+1}/${totalBatches} • ${g.grupo} (lote ${i+1}/${batches.length})`;
-        const { ok, status, data } = await sendToChatbase({ chatbotId, apiKey, proxyUrl, conversationId: convId, messages });
-        const texto = (data && (data.text || data.reply || data.response || JSON.stringify(data).slice(0,300))) || '';
-        resultsEl.innerHTML += `<div>${ok ? '✅' : '❌'} <b>${g.grupo}</b> (${convId}) • lote ${i+1}/${batches.length} → ${ok ? (texto || 'OK') : ('HTTP '+status+' '+(data.error || 'Falha'))}</div>`;
-        if (ok) setTranscript(convId, messages); // salva histórico atualizado
+        barTxt.textContent = `${passLabel}: ${sentThisPass + 1}/${totalBatchesThisPass} • ${grp} (lote ${i + 1}/${batches.length})`;
+
+        const { ok, status, data } = await sendToChatbase({
+          chatbotId, apiKey, proxyUrl, conversationId: convId, messages
+        });
+
+        const texto = (data && (data.text || data.reply || data.response || JSON.stringify(data).slice(0, 300))) || '';
+
+        resultsEl.innerHTML += `<div>${ok ? '✅' : '❌'} <b>${grp}</b> (${convId}) • lote ${i + 1}/${batches.length} → ${ok ? (texto || 'OK') : ('HTTP ' + status + ' ' + (data.error || 'Falha'))}</div>`;
+
+        if (ok) {
+          setTranscript(convId, messages); // atualiza histórico só quando teve sucesso
+        } else {
+          groupHadFailure = true; // marca falha do grupo nesta passada
+        }
       } catch (e) {
-        resultsEl.innerHTML += `<div>❌ <b>${g.grupo}</b> (${convId}) • lote ${i+1}/${batches.length} → ${e.message || e}</div>`;
+        resultsEl.innerHTML += `<div>❌ <b>${grp}</b> (${convId}) • lote ${i + 1}/${batches.length} → ${e.message || e}</div>`;
+        groupHadFailure = true;
       }
 
-      sent++;
-      bar.value = Math.round(sent * 100 / totalBatches);
+      sentThisPass++;
+      bar.value = Math.round((sentThisPass * 100) / totalBatchesThisPass);
+    }
+
+    if (groupHadFailure) {
+      failCounts.set(grp, (failCounts.get(grp) || 0) + 1);
+    } else {
+      // se passou limpo nesta passada, remove do mapa (não precisa re-tentar)
+      failCounts.delete(grp);
     }
   }
 
-  barTxt.textContent = `Concluído ${sent}/${totalBatches}`;
-  btn.disabled = false; btn.textContent = prevLabel;
+  // Prepara a próxima passada: só os grupos que falharam e ainda não estouraram 3 tentativas
+  const toRetry = new Set(
+    [...failCounts.entries()]
+      .filter(([, count]) => count < 3)
+      .map(([grp]) => grp)
+  );
+
+  if (toRetry.size && attempt < 3) {
+    // monta nova lista só com os grupos para reenvio
+    currentPlans = plans.filter(p => toRetry.has(p.g.grupo));
+    // breve respiro para evitar picos de carga
+    await new Promise(r => setTimeout(r, 1500));
+    attempt++;
+  } else {
+    break; // nada a re-tentar ou atingiu o limite de 3
+  }
+}
+
+const esgotados = [...failCounts.entries()]
+  .filter(([, count]) => count >= 3)
+  .map(([grp]) => grp);
+
+if (esgotados.length) {
+  resultsEl.innerHTML += `<div style="color:#ffb3b3;margin-top:6px;">Reenvio esgotado (3 tentativas) para: <b>${esgotados.join(', ')}</b>.</div>`;
+} else {
+  resultsEl.innerHTML += `<div style="color:#9ff3c1;margin-top:6px;">Todos os grupos enviados com sucesso.</div>`;
+}
+
+barTxt.textContent = `Concluído`;
+btn.disabled = false;
+btn.textContent = prevLabel;
 });
 /* ======================= FIM — CHATBASE (LOTES ≤ 8000) ======================= */
 </script>
