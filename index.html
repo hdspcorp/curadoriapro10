@@ -558,6 +558,23 @@
   left: 0;
   pointer-events: none; /* <-- adicione esta linha */
 }
+/* Botão fixo para SAIR do Modo Foco (visível só no foco) */
+#focusExitBtn{
+  position: fixed;
+  top: 14px;
+  right: 16px;
+  display: none;               /* padrão: escondido */
+  z-index: 10000;
+  padding: 8px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.18);
+  background: linear-gradient(135deg,#FFE08A 0%, #FFC96B 100%);
+  color:#1a1205;
+  font-weight: 700;
+  box-shadow: 0 10px 26px rgba(255,201,107,.18);
+  cursor: pointer;
+}
+body.focus-mode #focusExitBtn{ display: inline-flex; }
   </style>
   <style id="chatbase-theme">
   /* ====== Chatbase Modal • Tema Premium (escopo isolado em #chatbaseModal) ====== */
@@ -903,6 +920,46 @@
     .painel-estatisticas, .painel-filtros, .painel-exportacao,
     .conversation-container, .chart-box{ padding:14px; }
   }
+  /* =============== MODO FOCO (layout) =============== */
+body.focus-mode .top-panel-row,
+body.focus-mode #painel-filtros,
+body.focus-mode #painel-exportacao,
+body.focus-mode .chart-box {
+  display: none !important;
+}
+
+body.focus-mode #mainGrid {
+  grid-template-columns: 1fr !important;
+}
+
+body.focus-mode .conversation-container {
+  min-height: 70vh;
+  padding-top: 8px;
+}
+
+/* =============== Botão Modo Foco — estilo premium =============== */
+#focusModeBtn{
+  background: linear-gradient(135deg,#2ee2f7 0%, #64f1d3 100%);
+  color:#04202e;
+  border:1px solid rgba(46,226,247,.25);
+  border-radius:12px;
+  padding:8px 14px;
+  font-weight:700;
+  letter-spacing:.2px;
+  box-shadow: 0 1px 0 rgba(255,255,255,.2) inset, 0 8px 20px rgba(46,226,247,.10);
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+#focusModeBtn:hover{
+  transform:translateY(-1px);
+  filter:brightness(1.02);
+  box-shadow:0 10px 26px rgba(46,226,247,.18);
+}
+#focusModeBtn:active{ transform:translateY(0); }
+/* Quando ativo, mudo o gradiente para destacar o estado */
+body.focus-mode #focusModeBtn{
+  background: linear-gradient(135deg,#FFE08A 0%, #FFC96B 100%);
+  border-color: rgba(255,201,107,.35);
+}
 </style>
 <style id="app-premium-theme">
   /* ====== Visuais Premium para o Programa ====== */
@@ -1234,8 +1291,8 @@
 </head>
 <body>
   <header>
-    <h1 class="kiara-title">Curadoria - Pré</h1>
-    <div class="assinatura-hdsp">HDSP Corp. Ver. 5.6</div>
+    <h1 class="kiara-title">Curadoria Pro - Kiara</h1>
+    <div class="assinatura-hdsp">HDSP Corp. Ver. 5.5</div>
   </header>
   <div id="container-inicial" class="container-centralizado-inicial">
     <div class="upload-section" id="uploadSection">
@@ -1244,7 +1301,7 @@
       <span class="file-name" id="fileName"></span>
     </div>
     <div id="mensagem-inicial" class="msg-inicial">
-      Importe um arquivo JSON
+      Importe um arquivo JSON para visualizar, filtrar e exportar suas interações agrupadas.
     </div>
   </div>
   <div class="top-panel-row" id="topPanelRow" style="display:none;">
@@ -1268,6 +1325,9 @@
 	  <div id="importarOutroContainer" style="width:100%;margin-top:12px;display:none;flex-direction:column;align-items:flex-start;">
   <button id="importarOutroBtn" style="background:#184e67;color:#fff;font-weight:600;border-radius:8px;padding:9px 21px;font-size:.99em;border:none;box-shadow:0 1.5px 7px #003a2b10;cursor:pointer;margin-bottom:3px;">Importar outro arquivo</button>
   <span id="nomeArquivoImportado" style="color:#8fe7ff;font-size:.97em;font-weight:500;margin-top:2px;word-break:break-all;"></span>
+</div>
+<div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+  <button id="focusModeBtn" class="btn-ghost" type="button">Modo Foco</button>
 </div>
     </div>
     <div class="painel-filtros" id="painel-filtros" style="display:none;">
@@ -1299,7 +1359,6 @@
       <button id="downloadBtn" style="display:none;cursor:pointer;">Exportar (.json) Completo</button>
       <button id="downloadZipBtn" style="display:none;cursor:pointer;">Exportar (.json) por grupo</button>
       <button id="showUserSelectBtn" style="display:none;cursor:pointer;">Exportar (.json) grupos selecionados</button>
-      <button id="downloadIdsBtn" style="display:none;cursor:pointer;">Exportar IDs baixados</button>
 	  <button id="exportTopicosBtn" style="cursor:pointer;">Exportar Relatório por Tópicos (CSV)</button>
 	  <button id="exportMarcadasBtn" style="cursor:pointer;">Exportar Marcadas (CSV)</button>
 	  <button id="chatbasePanelBtn" style="cursor:pointer;">Chatbase • Envio/Config</button>
@@ -1591,7 +1650,6 @@ agrupamentos.forEach(g => {
   $("downloadBtn").style.display = "";
   $("downloadZipBtn").style.display = "";
   $("showUserSelectBtn").style.display = "";
-  $("downloadIdsBtn").style.display = "";
 
   preencherFiltroTopicos(topicMap);
   limparFiltros();
@@ -1624,7 +1682,6 @@ function resetUI() {
   $("downloadBtn").style.display = "none";
   $("downloadZipBtn").style.display = "none";
   $("showUserSelectBtn").style.display = "none";
-  $("downloadIdsBtn").style.display = "none";
   $("result").innerHTML = '';
   $("fileDateRange").textContent = "";
   $("estat-data").style.display = "none";
@@ -1948,14 +2005,6 @@ $("downloadZipBtn").onclick = async () => {
   });
 };
 $("showUserSelectBtn").onclick = () => abrirModalSelecionarGrupos();
-$("downloadIdsBtn").onclick = () => {
-  if(!idsBaixados.length) return alert("Nenhum ID baixado!");
-  const blob = new Blob([JSON.stringify(idsBaixados, null, 2)], {type:"application/json"});
-  let link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "ids_baixados.json";
-  link.click();
-};
 
 // Gráficos (pizza do mesmo tamanho)
 function renderCharts() {
@@ -2620,6 +2669,44 @@ btn.disabled = false;
 btn.textContent = prevLabel;
 });
 /* ======================= FIM — CHATBASE (LOTES ≤ 8000) ======================= */
+</script>
+<script>
+/* ===== Modo Foco: alternância + botão persistente ===== */
+(function(){
+  const focusBtn     = document.getElementById('focusModeBtn');
+  const focusExitBtn = document.getElementById('focusExitBtn');
+
+  function setFocus(on){
+    document.body.classList.toggle('focus-mode', on);
+    if (focusBtn) focusBtn.textContent = on ? 'Sair do Modo Foco' : 'Modo Foco';
+  }
+  function toggleFocus(){
+    setFocus(!document.body.classList.contains('focus-mode'));
+  }
+
+  if (focusBtn)     focusBtn.addEventListener('click', toggleFocus);
+  if (focusExitBtn) focusExitBtn.addEventListener('click', ()=> setFocus(false));
+
+  // ESC sai do foco
+  document.addEventListener('keydown', (e)=>{
+    if (e.key === 'Escape' && document.body.classList.contains('focus-mode')) setFocus(false);
+  });
+})();
+</script>
+<!-- Botão fixo para sair do Modo Foco -->
+<button id="focusExitBtn" aria-label="Sair do Modo Foco" title="Sair do Modo Foco">Sair do Modo Foco</button>
+<script>
+  (function () {
+    var exitBtn = document.getElementById('focusExitBtn');
+    if (!exitBtn) return;
+    exitBtn.addEventListener('click', function () {
+      // sai do modo foco
+      document.body.classList.remove('focus-mode');
+      // restaura o rótulo do botão principal (se existir)
+      var focusToggle = document.getElementById('focusModeBtn');
+      if (focusToggle) focusToggle.textContent = 'Modo Foco';
+    });
+  })();
 </script>
 </body>
 </html>
